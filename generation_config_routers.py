@@ -190,6 +190,7 @@ def generer_config(nom_r):
     "route-map EXPORT_TO_CUSTOMER permit 50",
     "!"
 ]
+    #Configation LDP sur les routeurs utilisant OSPF
         if igp == "ospf":
         config += [
         "!",
