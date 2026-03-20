@@ -190,6 +190,21 @@ def generer_config(nom_r):
     "route-map EXPORT_TO_CUSTOMER permit 50",
     "!"
 ]
+        if igp == "ospf":
+        config += [
+        "!",
+        "! ===== MPLS LDP CONFIG =====",
+        "ip cef",
+        "mpls label protocol ldp",
+        "mpls ldp router-id Loopback0 force",
+        "!",
+    ]
+
+        for int_name, details in r_data["interface"].items():
+            if details != {} and 'relation' not in details: #on ne configure pas le mpls sur les liens vers les clients
+                config.append(f"interface {int_name}")
+                config.append(" mpls ip")
+                config.append("!")
     return "\n".join(config)
 
 
