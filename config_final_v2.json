@@ -1,0 +1,156 @@
+{
+    "as": {
+        "as111": {
+            "adresse_reseau": "2001:111:",
+            "graphe_router": {
+                "ebgp": {
+                    "R2": {
+                        "adresse_ip": "2001:222:1::2/64",
+                        "relation": "customer",
+                        "voisin": "R1"
+                    },
+                    "R5": {
+                        "adresse_ip": "2001:333:2::2/64",
+                        "relation": "customer",
+                        "voisin": "R6"
+                    }
+                },
+                "ibgp": {
+                    "R2": [
+                        "R3"
+                    ],
+                    "R3": [
+                        "R4"
+                    ],
+                    "R4": [
+                        "R5"
+                    ]
+                }
+            },
+            "metrique_ospf": {
+                "R2": [
+                    {
+                        "cost": "50",
+                        "interface": "GigabitEthernet1/0",
+                        "voisin": "R3"
+                    }
+                ],
+                "R3": [
+                    {
+                        "cost": "50",
+                        "interface": "GigabitEthernet2/0",
+                        "voisin": "R4"
+                    },
+                    {
+                        "cost": "50",
+                        "interface": "GigabitEthernet1/0",
+                        "voisin": "R2"
+                    }
+                ],
+                "R4": [
+                    {
+                        "cost": "50",
+                        "interface": "GigabitEthernet2/0",
+                        "voisin": "R3"
+                    },
+                    {
+                        "cost": "50",
+                        "interface": "GigabitEthernet1/0",
+                        "voisin": "R5"
+                    }
+                ]
+            },
+            "numero_as": "111",
+            "protocole_igp": "ospf",
+            "roles_router": {
+                "CE": [
+                    "R1",
+                    "R6"
+                ],
+                "P": [
+                    "R3",
+                    "R4"
+                ],
+                "PE": [
+                    "R2",
+                    "R5"
+                ]
+            },
+            "router": {
+                "R2": {
+                    "interface": {
+                        "GigabitEthernet1/0": {
+                            "adresse_ip": "2001:111:1::1/64",
+                            "voisin": "R3"
+                        },
+                        "GigabitEthernet2/0": {
+                            "adresse_ip": "2001:222:1::2/64",
+                            "relation": "customer",
+                            "voisin": "R1"
+                        }
+                    },
+                    "loopback": "2001:111::2/128",
+                    "router_id": "2.2.2.2"
+                },
+                "R3": {
+                    "interface": {
+                        "GigabitEthernet1/0": {
+                            "adresse_ip": "2001:111:1::2/64",
+                            "voisin": "R2"
+                        },
+                        "GigabitEthernet2/0": {
+                            "adresse_ip": "2001:111:2::1/64",
+                            "voisin": "R4"
+                        }
+                    },
+                    "loopback": "2001:111::3/128",
+                    "router_id": "3.3.3.3"
+                },
+                "R4": {
+                    "interface": {
+                        "GigabitEthernet1/0": {
+                            "adresse_ip": "2001:111:2::2/64",
+                            "voisin": "R3"
+                        },
+                        "GigabitEthernet2/0": {
+                            "adresse_ip": "2001:111:3::1/64",
+                            "voisin": "R5"
+                        }
+                    },
+                    "loopback": "2001:111::4/128",
+                    "router_id": "4.4.4.4"
+                },
+                "R5": {
+                    "interface": {
+                        "GigabitEthernet1/0": {
+                            "adresse_ip": "2001:111:3::2/64",
+                            "voisin": "R4"
+                        },
+                        "GigabitEthernet2/0": {
+                            "adresse_ip": "2001:333:2::2/64",
+                            "relation": "customer",
+                            "voisin": "R6"
+                        }
+                    },
+                    "loopback": "2001:111::5/128",
+                    "router_id": "5.5.5.5"
+                }
+            },
+            "topologie_mpls": {
+                "chemin_principal": [
+                    "R1",
+                    "R2",
+                    "R3",
+                    "R4",
+                    "R5",
+                    "R6"
+                ],
+                "type": "CE-PE-P-P-PE-CE"
+            }
+        }
+    },
+    "liste_interface": [
+        "GigabitEthernet1/0",
+        "GigabitEthernet2/0"
+    ]
+}

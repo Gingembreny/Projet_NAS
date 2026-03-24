@@ -26,31 +26,31 @@
           {
             "voisin": "R3",
             "interface": "GigabitEthernet1/0",
-            "cost": 50
+            "cost": "50"
           }
         ],
         "R3": [
           {
             "voisin": "R4",
             "interface": "GigabitEthernet2/0",
-            "cost": 50
+            "cost": "50"
           },
           {
             "voisin": "R2",
             "interface": "GigabitEthernet1/0",
-            "cost": 50
+            "cost": "50"
           }
         ],
         "R4": [
           {
             "voisin": "R3",
             "interface": "GigabitEthernet2/0",
-            "cost": 50
+            "cost": "50"
           },
           {
             "voisin": "R5",
             "interface": "GigabitEthernet1/0",
-            "cost": 50
+            "cost": "50"
           }
         ]
       },
@@ -66,12 +66,12 @@
           "R2": {
             "relation": "customer",
             "voisin": "R1",
-            "adresse_ip": "2001:111:1::2/64"
+            "adresse_ip": "2001:222:1::2/64"
           },
           "R5": {
             "relation": "customer",
             "voisin": "R6",
-            "adresse_ip": "2001:111:2::2/64"
+            "adresse_ip": "2001:333:2::2/64"
           }
         }
       },

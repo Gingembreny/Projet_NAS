@@ -6,7 +6,7 @@ import os
 
 # --- Configuration des Chemins ---
 CHEMIN_PROJET = "C:/Users/taiga/NAS/gns/nasu/project-files/dynamips"
-FICHIER_JSON = "config_final.json"
+FICHIER_JSON = "config_final_v2.json"
 
 mapping_routeur_uuid = {
     "R1": "aded9dd6-86f5-4fd7-b7ef-b37eecb64ca3", "R2": "ae6e2ba5-b1a5-46c2-ab45-eb0bde132451",
@@ -191,7 +191,7 @@ def generer_config(nom_r):
     "!"
 ]
     #Configation LDP sur les routeurs utilisant OSPF
-        if igp == "ospf":
+    if igp == "ospf":
         config += [
         "!",
         "! ===== MPLS LDP CONFIG =====",

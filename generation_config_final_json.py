@@ -4,11 +4,12 @@
 import json
 
 # --- Topologies internes ---
-voisin1 = {"R1": ["R2","R3"], "R2": ["R3","R4"], "R3":["R5"], "R4":["R5","R6","R7"], "R5":["R6","R7"]} # AS 111
-voisin2 = {"R8": ["R9","R10"], "R9": ["R10","R11"], "R10":["R12"], "R11":["R12","R13","R14"], "R12":["R13","R14"]} # AS 222
-voisin3 = {"R15": ["R16"]}  # AS 333
-voisin4 = {"R17": ["R18"]}  # AS 444
-voisin5 = {"R19": ["R20"]}  # AS 555
+voisin1 = {
+          "R2": ["R3"],
+          "R3": ["R4"],
+          "R4": ["R5"]
+        } # AS 111
+
 
 FICHIER_JSON = "fichier_intension.json"
 
@@ -74,6 +75,6 @@ for nom_as, content in data["as"].items():
                 content['router'][r_nom]['interface'][intf_nom]['cost'] = '50'
 
                 
-with open("config_final.json", "w", encoding="utf-8") as f:
+with open("config_final_v2.json", "w", encoding="utf-8") as f:
     json.dump(data, f, indent=4, sort_keys=True)
 print("JSON généré avec succès")
