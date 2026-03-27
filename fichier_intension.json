@@ -1,82 +1,24 @@
 {
   "liste_interface": [
+    "FastEthernet0/0",
     "GigabitEthernet1/0",
-    "GigabitEthernet2/0"
+    "GigabitEthernet2/0",
+    "GigabitEthernet3/0"
   ],
 
   "as": {
     "as111": {
       "numero_as": "111",
-      "protocole_igp": "ospf",
-      "adresse_reseau": "2001:111:",
-
-      "topologie_mpls": {
-        "type": "CE-PE-P-P-PE-CE",
-        "chemin_principal": ["R1", "R2", "R3", "R4", "R5", "R6"]
+      "adresse_reseau": "10.10.10.",
+      "topologie": {
+        "P1" : ["RR", "P2", "PE1"],
+        "RR" : ["P2"],
+        "P2" : ["PE2"],
+        "PE1" : [],
+        "PE2" : []
       },
 
-      "roles_router": {
-        "CE": ["R1", "R6"],
-        "PE": ["R2", "R5"],
-        "P": ["R3", "R4"]
-      },
-
-      "metrique_ospf": {
-        "R2": [
-          {
-            "voisin": "R3",
-            "interface": "GigabitEthernet1/0",
-            "cost": "50"
-          }
-        ],
-        "R3": [
-          {
-            "voisin": "R4",
-            "interface": "GigabitEthernet2/0",
-            "cost": "50"
-          },
-          {
-            "voisin": "R2",
-            "interface": "GigabitEthernet1/0",
-            "cost": "50"
-          }
-        ],
-        "R4": [
-          {
-            "voisin": "R3",
-            "interface": "GigabitEthernet2/0",
-            "cost": "50"
-          },
-          {
-            "voisin": "R5",
-            "interface": "GigabitEthernet1/0",
-            "cost": "50"
-          }
-        ]
-      },
-
-      "graphe_router": {
-        "ibgp": {
-          "R2": ["R3"],
-          "R3": ["R4"],
-          "R4": ["R5"]
-        },
-
-        "ebgp": {
-          "R2": {
-            "relation": "customer",
-            "voisin": "R1",
-            "adresse_ip": "2001:222:1::2/64"
-          },
-          "R5": {
-            "relation": "customer",
-            "voisin": "R6",
-            "adresse_ip": "2001:333:2::2/64"
-          }
-        }
-      },
-
-      "router": {}
+      "routers": {}
     }
   }
 }

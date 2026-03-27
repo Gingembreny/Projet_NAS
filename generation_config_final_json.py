@@ -3,78 +3,85 @@
 
 import json
 
-# --- Topologies internes ---
-voisin1 = {
-          "R2": ["R3"],
-          "R3": ["R4"],
-          "R4": ["R5"]
-        } # AS 111
-
-
 FICHIER_JSON = "fichier_intension.json"
 
 with open(FICHIER_JSON, "r") as f:
     data = json.load(f)
 
-def get_free_interface(nom_as, nom_router):
-    router_obj = data["as"][nom_as]["router"][nom_router]
-    for intf in data["liste_interface"]:
-        if not router_obj["interface"][intf]:
+
+#as 111
+num_as = "111"
+liste_interface = data["liste_interface"]
+data_as111 = data["as"]["as111"]
+adresse_reseau = data_as111["adresse_reseau"]
+
+def get_free_interface(nom_router):
+    router_obj = data_as111["routers"][nom_router]
+    used_interfaces = []
+    for voisin in router_obj["voisin"].values():
+        if "interface" in voisin:
+            used_interfaces.append(voisin["interface"])
+    for intf in liste_interface:
+        if intf not in used_interfaces:
             return intf
+    return None  
+
+# {
+#         "nom":"",
+#         "router_id": "",
+#         "adresse_ip": "",
+#         "adresse_loopback": ""
+#       }
+
+id_loopback = 1
+id_ip_adresse = 0
+
+for router in data_as111["topologie"]:
+    if router not in data_as111["routers"]:
+        data_as111["routers"][router] = {
+            "nom": router,
+            "router_id": num_as + ".0.0." + str(id_loopback),
+            "adresse_loopback": adresse_reseau + str(id_loopback) + "/32",
+            "voisin": {
+                # "nom": "",
+                # "interface": "",
+                # "adresse_ip": "",
+                # "reseau" : ""
+            }
+        }
+        id_loopback += 1
 
 
-# initialisation des routeurs et Loopbacks
-for nom_as, content in data["as"].items():
-    all_routers = set(content["graphe_router"]["ibgp"].keys())
-    for v in content["graphe_router"]["ibgp"].values():
-        all_routers.update(v)
-    for r in all_routers:
-        num = r.replace("R", "")
-        content["router"][r] = {
-            "router_id": f"{num}.{num}.{num}.{num}",
-            "loopback": f"{content['adresse_reseau']}:{num}/128",
-            "interface": {intf: {} for intf in data["liste_interface"]}
+
+liens_deja_crees = set()
+
+for router in data_as111["topologie"]:
+    for voisin in data_as111["topologie"][router]:
+        lien = tuple(sorted([router, voisin]))
+        if lien in liens_deja_crees:
+            continue
+        liens_deja_crees.add(lien)
+        intf_router = get_free_interface(router)
+        intf_voisin = get_free_interface(voisin)
+        ip_router = adresse_reseau + str(id_ip_adresse + 1) + "/30"
+        ip_voisin = adresse_reseau + str(id_ip_adresse + 2) + "/30"
+        reseau = adresse_reseau + str(id_ip_adresse) + "/30"
+        data_as111["routers"][router]["voisin"][voisin] = {
+            "interface": intf_router,
+            "nom": voisin,
+            "adresse_ip": ip_router,
+            "reseau": reseau
+        }
+        data_as111["routers"][voisin]["voisin"][router] = {
+            "interface": intf_voisin,
+            "nom": router,
+            "adresse_ip": ip_voisin,
+            "reseau": reseau
         }
 
-#configuration iBGP 
-for nom_as, content in data["as"].items():
-    prefixe = content["adresse_reseau"]
-    compteur_lien = 1
-    
-    for r_source, voisins in content["graphe_router"]["ibgp"].items():
-        for r_dest in voisins:
-            intf_s = get_free_interface(nom_as, r_source)
-            intf_d = get_free_interface(nom_as, r_dest)
-            if intf_s and intf_d:
-                subnet = f"{prefixe}{compteur_lien}" # 2001:prefixe(ex 111):numlien(ex 1)::1ou2/64
-                data["as"][nom_as]["router"][r_source]["interface"][intf_s] = {"voisin": r_dest, "adresse_ip": f"{subnet}::1/64"}
-                data["as"][nom_as]["router"][r_dest]["interface"][intf_d] = {"voisin": r_source, "adresse_ip": f"{subnet}::2/64"}
-                compteur_lien += 1
+        id_ip_adresse += 4
+            
 
-#configuration eBGP                 
-for i in data['as']:
-    for r, donnee in data['as'][i]['graphe_router']['ebgp'].items():
-        for r2 in data['as'][i]['router']:
-            if r == r2:
-                free_interface = get_free_interface(i, r2)
-                data['as'][i]['router'][r2]['interface'][free_interface] = {
-                                                        "voisin": donnee["voisin"],
-                                                        "relation": donnee["relation"],
-                                                        "adresse_ip": donnee["adresse_ip"]
-                                                        }
-
-# coûts OSPF 
-for nom_as, content in data["as"].items():
-    if content.get('numero_as') == '222' and 'metrique_ospf' in content:
-        for r_nom, config_metrique in content['metrique_ospf'].items():
-            intf_nom = config_metrique['interface']
-            if r_nom in content['router']:
-                if intf_nom not in content['router'][r_nom]['interface']:
-                     content['router'][r_nom]['interface'][intf_nom] = {}
-                
-                content['router'][r_nom]['interface'][intf_nom]['cost'] = '50'
-
-                
 with open("config_final_v2.json", "w", encoding="utf-8") as f:
     json.dump(data, f, indent=4, sort_keys=True)
 print("JSON généré avec succès")
