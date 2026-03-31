@@ -1,0 +1,43 @@
+Mar 31 12:45:10.827 HYPERVISOR: Release 0.2.23-amd64/Darwin (tag 2023010200)
+Mar 31 12:45:10.828 HYPERVISOR: Started on IP = 127.0.0.1, TCP port = 50356.
+Mar 31 12:45:10.832 HYPERVISOR: exec_cmd: hypervisor version 
+Mar 31 12:45:10.832 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips 
+Mar 31 12:45:10.832 GENERAL: working_dir=/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips
+Mar 31 12:45:10.833 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/81f36527-0efe-4ada-b429-77b425b5b8b1 
+Mar 31 12:45:10.833 GENERAL: working_dir=/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/81f36527-0efe-4ada-b429-77b425b5b8b1
+Mar 31 12:45:10.833 HYPERVISOR: exec_cmd: vm create R2 2 c7200 
+Mar 31 12:45:10.833 VM: VM R2 created.
+Mar 31 12:45:10.834 HYPERVISOR: exec_cmd: vm set_con_tcp_port R2 5001 
+Mar 31 12:45:10.834 HYPERVISOR: exec_cmd: c7200 get_mac_addr R2 
+Mar 31 12:45:10.834 HYPERVISOR: exec_cmd: vm get_status R2 
+Mar 31 12:45:10.835 HYPERVISOR: exec_cmd: vm slot_add_binding R2 0 0 C7200-IO-FE 
+Mar 31 12:45:10.835 HYPERVISOR: exec_cmd: vm set_ios R2 /Users/gaillardou/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Mar 31 12:45:10.835 HYPERVISOR: exec_cmd: vm set_ram R2 512 
+Mar 31 12:45:10.835 HYPERVISOR: exec_cmd: vm set_nvram R2 512 
+Mar 31 12:45:10.836 HYPERVISOR: exec_cmd: vm set_disk0 R2 0 
+Mar 31 12:45:10.836 HYPERVISOR: exec_cmd: vm get_status R2 
+Mar 31 12:45:10.836 HYPERVISOR: exec_cmd: vm slot_add_binding R2 1 0 PA-GE 
+Mar 31 12:45:10.836 HYPERVISOR: exec_cmd: vm get_status R2 
+Mar 31 12:45:10.837 HYPERVISOR: exec_cmd: vm slot_add_binding R2 2 0 PA-GE 
+Mar 31 12:45:10.837 HYPERVISOR: exec_cmd: vm get_status R2 
+Mar 31 12:45:10.837 HYPERVISOR: exec_cmd: vm slot_add_binding R2 3 0 PA-GE 
+Mar 31 12:45:10.854 HYPERVISOR: exec_cmd: vm set_ios R2 /Users/gaillardou/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Mar 31 12:45:14.009 HYPERVISOR: exec_cmd: vm set_ios R2 /Users/gaillardou/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Mar 31 12:45:42.017 HYPERVISOR: exec_cmd: nio create_udp udp-ecdd06b8-62ac-4504-a418-4d8e532a1cbd 10004 127.0.0.1 10005 
+Mar 31 12:45:42.255 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R2 0 0 udp-ecdd06b8-62ac-4504-a418-4d8e532a1cbd 
+Mar 31 12:45:42.256 HYPERVISOR: exec_cmd: vm get_status R2 
+Mar 31 12:48:06.894 HYPERVISOR: exec_cmd: vm get_status R2 
+Mar 31 12:48:06.894 HYPERVISOR: exec_cmd: vm slot_remove_nio_binding R2 0 0 
+Mar 31 12:48:06.895 HYPERVISOR: exec_cmd: nio delete udp-ecdd06b8-62ac-4504-a418-4d8e532a1cbd 
+Mar 31 12:48:33.617 HYPERVISOR: exec_cmd: nio create_udp udp-aae298a4-9ca2-4355-9b56-4eb17be4b27f 10002 127.0.0.1 10003 
+Mar 31 12:48:33.618 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R2 0 0 udp-aae298a4-9ca2-4355-9b56-4eb17be4b27f 
+Mar 31 12:48:33.618 HYPERVISOR: exec_cmd: vm get_status R2 
+Mar 31 12:48:39.000 HYPERVISOR: exec_cmd: nio create_udp udp-668d2d1b-e776-4df3-9983-c47ad21088f8 10008 127.0.0.1 10009 
+Mar 31 12:48:39.001 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R2 1 0 udp-668d2d1b-e776-4df3-9983-c47ad21088f8 
+Mar 31 12:48:39.001 HYPERVISOR: exec_cmd: vm get_status R2 
+Mar 31 12:48:41.884 HYPERVISOR: exec_cmd: nio create_udp udp-2f9b901b-da8a-49f3-9af7-74b600cf6528 10014 127.0.0.1 10015 
+Mar 31 12:48:41.885 HYPERVISOR: exec_cmd: vm slot_add_nio_binding R2 2 0 udp-2f9b901b-da8a-49f3-9af7-74b600cf6528 
+Mar 31 12:48:41.886 HYPERVISOR: exec_cmd: vm get_status R2 
+Mar 31 12:49:26.468 HYPERVISOR: exec_cmd: vm set_ios R2 /Users/gaillardou/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+Mar 31 12:49:26.468 HYPERVISOR: exec_cmd: vm rename R2 P1 
+Mar 31 12:49:26.491 HYPERVISOR: exec_cmd: vm set_ios P1 /Users/gaillardou/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 

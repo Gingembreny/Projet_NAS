@@ -14,6 +14,7 @@ num_as = "111"
 liste_interface = data["liste_interface"]
 data_as111 = data["as"]["as111"]
 adresse_reseau = data_as111["adresse_reseau"]
+loopback = data_as111["adresse_loopback"]
 
 def get_free_interface(nom_router):
     router_obj = data_as111["routers"][nom_router]
@@ -41,7 +42,7 @@ for router in data_as111["topologie"]:
         data_as111["routers"][router] = {
             "nom": router,
             "router_id": num_as + ".0.0." + str(id_loopback),
-            "adresse_loopback": adresse_reseau + str(id_loopback) + "/32",
+            "adresse_loopback": loopback + str(id_loopback) + "/32",
             "voisin": {
                 # "nom": "",
                 # "interface": "",

@@ -9,7 +9,64 @@
   "as": {
     "as111": {
       "numero_as": "111",
-      "adresse_reseau": "10.10.10.",
+      "adresse_reseau": "10.10.1.",
+      "adresse_loopback": "10.10.10.",
+      "topologie": {
+        "P1" : ["RR", "P2", "PE1"],
+        "RR" : ["P2"],
+        "P2" : ["PE2"],
+        "PE1" : [],
+        "PE2" : []
+      },
+
+      "routers": {}
+    },
+    "as222": {
+      "numero_as": "222",
+      "adresse_reseau": "10.20.1.",
+      "adresse_loopback": "10.20.10.",
+      "topologie": {
+        "P1" : ["RR", "P2", "PE1"],
+        "RR" : ["P2"],
+        "P2" : ["PE2"],
+        "PE1" : [],
+        "PE2" : []
+      },
+
+      "routers": {}
+    },
+"as333": {
+      "numero_as": "333",
+      "adresse_reseau": "10.30.1.",
+      "adresse_loopback": "10.30.10.",
+      "topologie": {
+        "P1" : ["RR", "P2", "PE1"],
+        "RR" : ["P2"],
+        "P2" : ["PE2"],
+        "PE1" : [],
+        "PE2" : []
+      },
+
+      "routers": {}
+    },
+    "as444": {
+      "numero_as": "444",
+      "adresse_reseau": "10.40.1.",
+      "adresse_loopback": "10.40.10.",
+      "topologie": {
+        "P1" : ["RR", "P2", "PE1"],
+        "RR" : ["P2"],
+        "P2" : ["PE2"],
+        "PE1" : ["RR"],
+        "PE2" : ["RR"]
+      },
+
+      "routers": {}
+    },
+    "as555": {
+      "numero_as": "555",
+      "adresse_reseau": "10.50.1.",
+      "adresse_loopback": "10.50.10.",
       "topologie": {
         "P1" : ["RR", "P2", "PE1"],
 		"P2" : ["P1", "PE2"],
