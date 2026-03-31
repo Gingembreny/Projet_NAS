@@ -5,13 +5,17 @@ import json
 import os
 
 # --- Configuration des Chemins ---
-CHEMIN_PROJET = "C:/Users/taiga/NAS/gns/nasu/project-files/dynamips"
-FICHIER_JSON = "config_final_v2.json"
+CHEMIN_PROJET = "/Users/gaillardou/Desktop/gns/testfinal/project-files/dynamips/"
+FICHIER_JSON = "config_final.json"
 
 mapping_routeur_uuid = {
-    "R1": "aded9dd6-86f5-4fd7-b7ef-b37eecb64ca3", "R2": "ae6e2ba5-b1a5-46c2-ab45-eb0bde132451",
-    "R3": "5cc40283-5572-45c1-a871-360b484c78db", "R4": "44c9b3f6-c5f8-491c-9004-d9a761f450fb",
-   }
+    "PE1": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/3a059d65-05f2-4abd-a421-2534fa565e97",
+    "P1": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/81f36527-0efe-4ada-b429-77b425b5b8b1",
+    "P2": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/81f36527-0efe-4ada-b429-77b425b5b8b1",
+    "P3": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/65a3a450-a200-4ab8-bb2a-67cc36b0bed7",
+    "PE2": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/ad0c50d6-85f9-4965-8b7d-4f4bc5a98c2a",
+    "RR": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/22d9e17b-923e-47c4-a224-686e371a1472"
+}
 
 with open(FICHIER_JSON, "r") as f:
     donnees = json.load(f)
@@ -190,22 +194,6 @@ def generer_config(nom_r):
     "route-map EXPORT_TO_CUSTOMER permit 50",
     "!"
 ]
-    #Configation LDP sur les routeurs utilisant OSPF
-    if igp == "ospf":
-        config += [
-        "!",
-        "! ===== MPLS LDP CONFIG =====",
-        "ip cef",
-        "mpls label protocol ldp",
-        "mpls ldp router-id Loopback0 force",
-        "!",
-    ]
-
-        for int_name, details in r_data["interface"].items():
-            if details != {} and 'relation' not in details: #on ne configure pas le mpls sur les liens vers les clients
-                config.append(f"interface {int_name}")
-                config.append(" mpls ip")
-                config.append("!")
     return "\n".join(config)
 
 

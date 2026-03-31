@@ -1,7 +1,8 @@
 {
     "as": {
         "as111": {
-            "adresse_reseau": "10.10.10.",
+            "adresse_loopback": "10.10.10.",
+            "adresse_reseau": "10.10.1.",
             "numero_as": "111",
             "routers": {
                 "P1": {
@@ -10,22 +11,22 @@
                     "router_id": "111.0.0.1",
                     "voisin": {
                         "P2": {
-                            "adresse_ip": "10.10.10.5/30",
+                            "adresse_ip": "10.10.1.5/30",
                             "interface": "GigabitEthernet1/0",
                             "nom": "P2",
-                            "reseau": "10.10.10.4/30"
+                            "reseau": "10.10.1.4/30"
                         },
                         "PE1": {
-                            "adresse_ip": "10.10.10.9/30",
+                            "adresse_ip": "10.10.1.9/30",
                             "interface": "GigabitEthernet2/0",
                             "nom": "PE1",
-                            "reseau": "10.10.10.8/30"
+                            "reseau": "10.10.1.8/30"
                         },
                         "RR": {
-                            "adresse_ip": "10.10.10.1/30",
+                            "adresse_ip": "10.10.1.1/30",
                             "interface": "FastEthernet0/0",
                             "nom": "RR",
-                            "reseau": "10.10.10.0/30"
+                            "reseau": "10.10.1.0/30"
                         }
                     }
                 },
@@ -35,22 +36,22 @@
                     "router_id": "111.0.0.3",
                     "voisin": {
                         "P1": {
-                            "adresse_ip": "10.10.10.6/30",
+                            "adresse_ip": "10.10.1.6/30",
                             "interface": "FastEthernet0/0",
                             "nom": "P1",
-                            "reseau": "10.10.10.4/30"
+                            "reseau": "10.10.1.4/30"
                         },
                         "PE2": {
-                            "adresse_ip": "10.10.10.17/30",
+                            "adresse_ip": "10.10.1.17/30",
                             "interface": "GigabitEthernet2/0",
                             "nom": "PE2",
-                            "reseau": "10.10.10.16/30"
+                            "reseau": "10.10.1.16/30"
                         },
                         "RR": {
-                            "adresse_ip": "10.10.10.14/30",
+                            "adresse_ip": "10.10.1.14/30",
                             "interface": "GigabitEthernet1/0",
                             "nom": "RR",
-                            "reseau": "10.10.10.12/30"
+                            "reseau": "10.10.1.12/30"
                         }
                     }
                 },
@@ -60,10 +61,10 @@
                     "router_id": "111.0.0.4",
                     "voisin": {
                         "P1": {
-                            "adresse_ip": "10.10.10.10/30",
+                            "adresse_ip": "10.10.1.10/30",
                             "interface": "FastEthernet0/0",
                             "nom": "P1",
-                            "reseau": "10.10.10.8/30"
+                            "reseau": "10.10.1.8/30"
                         }
                     }
                 },
@@ -73,10 +74,10 @@
                     "router_id": "111.0.0.5",
                     "voisin": {
                         "P2": {
-                            "adresse_ip": "10.10.10.18/30",
+                            "adresse_ip": "10.10.1.18/30",
                             "interface": "FastEthernet0/0",
                             "nom": "P2",
-                            "reseau": "10.10.10.16/30"
+                            "reseau": "10.10.1.16/30"
                         }
                     }
                 },
@@ -86,16 +87,16 @@
                     "router_id": "111.0.0.2",
                     "voisin": {
                         "P1": {
-                            "adresse_ip": "10.10.10.2/30",
+                            "adresse_ip": "10.10.1.2/30",
                             "interface": "FastEthernet0/0",
                             "nom": "P1",
-                            "reseau": "10.10.10.0/30"
+                            "reseau": "10.10.1.0/30"
                         },
                         "P2": {
-                            "adresse_ip": "10.10.10.13/30",
+                            "adresse_ip": "10.10.1.13/30",
                             "interface": "GigabitEthernet1/0",
                             "nom": "P2",
-                            "reseau": "10.10.10.12/30"
+                            "reseau": "10.10.1.12/30"
                         }
                     }
                 }
