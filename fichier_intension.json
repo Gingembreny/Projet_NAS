@@ -36,11 +36,25 @@
 	"as222": {
 	  "numero_as": "222",
 	  "adresse_reseau": "10.20.1.",
+	  "adresse_loopback": "10.20.10.",
+	  "topologie": {},
+	  "topologie_client": {
+		"numero_as":"111",
+		"CE1": ["PE1"],
+		"CE3": ["PE2"]
+	  },
 	  "routers": {}
 	},
 	"as333": {
 			"numero_as": "333",
 			"adresse_reseau": "10.30.1.",
+			"adresse_loopback": "10.30.10.",
+			"topologie": {},
+			"topologie_client": {
+				"numero_as":"111",
+				"CE2": ["PE1"],
+				"CE4": ["PE2"]
+			 },
 			"routers": {}
 		}
   }
