@@ -1,10 +1,10 @@
-Dựa trên phân tích cấu trúc mạng AS111 từ sơ đồ và file JSON của bạn, dưới đây là hướng dẫn chi tiết các bước cấu hình **Addressing (Địa chỉ IP)** và **OSPF Routing** cho tất cả các thiết bị.
+Sur la base de l'analyse de la structure du réseau AS111 à partir du schéma et de votre fichier JSON, voici un guide détaillé des étapes de configuration de l'**Adressage (Adresses IP)** et du **Routage OSPF** pour tous les appareils.
 
 ---
 
-## **PHẦN 1: CẤU HÌNH ADDRESSING (ĐẶT ĐỊA CHỈ IP)**
+## **PARTIE 1: CONFIGURATION D'ADRESSAGE (ATTRIBUTION D'ADRESSES IP)**
 
-Ở bước này, chúng ta sẽ cấu hình địa chỉ IP cho các cổng vật lý và cổng ảo (Loopback) dựa trên bảng phân bổ.
+À cette étape, nous configurerons les adresses IP pour les ports physiques et les ports virtuels (Loopback) en fonction du tableau d'allocation.
 
 ### **1. Configuration du routeur P1**
 ```bash
@@ -150,20 +150,20 @@ Après la configuration, vous devez exécuter les commandes suivantes pour assur
     Depuis PE1: `ping 10.10.10.5 source Loopback0` (Ping vers Loopback PE2)
     *(Le résultat doit être 100% de succès)*
 
-Để cấu hình **Phase 1.a: LDP (Label Distribution Protocol)** cho mạng AS111 của bạn, mục tiêu là thiết lập việc phân phối nhãn MPLS giữa các Router cốt lõi để tạo ra các đường truyền nhãn (LSPs).
+Pour configurer la **Phase 1.a: LDP (Label Distribution Protocol)** pour votre réseau AS111, l'objectif est d'établir la distribution des étiquettes MPLS entre les routeurs cœur pour créer des chemins d'étiquettes (LSPs).
 
-Dưới đây là các bước cấu hình và xác thực chi tiết:
+Voici les étapes détaillées de configuration et de vérification:
 
 ---
 
-### **1. CẤU HÌNH BẬT MPLS LDP**
+### **1. CONFIGURATION ACTIVATION MPLS LDP**
 
-Bạn cần bật MPLS LDP trên tất cả các interface **nối giữa các Router trong AS111** (P1, P2, RR, PE1, PE2). Không bật trên interface hướng ra khách hàng (nếu có).
+Vous devez activer MPLS LDP sur toutes les interfaces **reliant les routeurs dans AS111** (P1, P2, RR, PE1, PE2). N'activez pas sur les interfaces vers les clients (le cas échéant).
 
-#### **Bước chung cho tất cả các Router:**
-Sử dụng giao thức LDP và chỉ định Loopback0 làm LDP Router-ID để đảm bảo tính ổn định.
+#### **Étape commune pour tous les routeurs:**
+Utilisez le protocole LDP et désignez Loopback0 comme LDP Router-ID pour assurer la stabilité.
 
-*   **Trên Router P1:**
+*   **Sur le routeur P1:**
     ```bash
     P1(config)# mpls ip
     P1(config)# mpls label protocol ldp
@@ -172,11 +172,9 @@ Sử dụng giao thức LDP và chỉ định Loopback0 làm LDP Router-ID để
     P1(config-if)# mpls ip
     P1(config)# interface GigabitEthernet1/0
     P1(config-if)# mpls ip
-    P1(config)# interface GigabitEthernet2/0
-    P1(config-if)# mpls ip
     ```
 
-*   **Trên Router RR:**
+*   **Sur le routeur RR:**
     ```bash
     RR(config)# mpls ip
     RR(config)# mpls label protocol ldp
@@ -187,7 +185,7 @@ Sử dụng giao thức LDP và chỉ định Loopback0 làm LDP Router-ID để
     RR(config-if)# mpls ip
     ```
 
-*   **Trên Router P2:**
+*   **Sur le routeur P2:**
     ```bash
     P2(config)# mpls ip
     P2(config)# mpls label protocol ldp
@@ -196,104 +194,107 @@ Sử dụng giao thức LDP và chỉ định Loopback0 làm LDP Router-ID để
     P2(config-if)# mpls ip
     P2(config)# interface GigabitEthernet1/0
     P2(config-if)# mpls ip
-    P2(config)# interface GigabitEthernet2/0
-    P2(config-if)# mpls ip
-    
-```
+    ```
 
-*   **Trên Router PE1 & PE2:**
+*   **Sur les routeurs PE1 et PE2:**
     ```bash
     PE1(config)# mpls ip
     PE1(config)# interface FastEthernet0/0
+    PE1(config-if)# mpls ip
+    PE1(config)# interface GigabitEthernet1/0
     PE1(config-if)# mpls ip
 
     PE2(config)# mpls ip
     PE2(config)# interface FastEthernet0/0
     PE2(config-if)# mpls ip
+    PE2(config)# interface GigabitEthernet1/0
+    PE2(config-if)# mpls ip
     ```
 
 ---
 
-### **2. XÁC THỰC (VALIDATE)**
+### **2. VÉRIFICATION (VALIDATE)**
 
-Bạn cần thực hiện 3 bước kiểm tra theo yêu cầu của Phase 1.a:
+Vous devez effectuer 3 étapes de vérification selon les exigences de la Phase 1.a:
 
-#### **A. Kiểm tra trạng thái phiên LDP (LDP Session States)**
-Lệnh này giúp bạn biết các Router đã thiết lập "quan hệ láng giềng" LDP thành công chưa.
+#### **A. Vérifier l'état des sessions LDP (LDP Session States)**
+Cette commande vous aide à savoir si les routeurs ont établi avec succès les "relations voisins" LDP.
 ```bash
 P1# show mpls ldp neighbor
 ```
-*   **Kết quả mong đợi:** Cột `State` phải hiển thị là **OPERATIONAL**. Điều này có nghĩa là TCP session (port 646) đã được thiết lập thành công giữa các Loopback IP.
+*   **Résultat attendu:** La colonne `State` doit afficher **OPERATIONAL**. Cela signifie que la session TCP (port 646) a été établie avec succès entre les adresses IP Loopback.
 
-#### **B. Kiểm tra vận chuyển MPLS (MPLS Transport in the core)**
-Lệnh này kiểm tra bảng chuyển tiếp nhãn (LFIB) để xem các nhãn đã được gán cho các prefix OSPF chưa.
+#### **B. Vérifier le transport MPLS (MPLS Transport dans le cœur)**
+Cette commande vérifie la table de commutation d'étiquettes (LFIB) pour voir si les étiquettes ont été attribuées aux préfixes OSPF.
 ```bash
 P1# show mpls forwarding-table
 ```
-*   **Giải thích:** Bạn sẽ thấy danh sách các `Local Tag` và `Outgoing Tag`. Nếu bạn thấy nhãn (số nguyên) cho các địa chỉ Loopback của các router khác, nghĩa là MPLS đang vận chuyển dữ liệu tốt.
+*   **Explication:** Vous verrez une liste d'`étiquettes locales` et d'`étiquettes sortantes`. Si vous voyez une étiquette (nombre entier) pour les adresses Loopback des autres routeurs, cela signifie que MPLS transporte correctement les données.
 
-#### **C. Kiểm tra cơ chế Penultimate Hop Popping (PHP)**
-PHP là cơ chế Router kề cuối sẽ gỡ bỏ nhãn MPLS trước khi gửi đến Router đích cuối cùng để giảm tải cho Router đích.
+#### **C. Vérifier le mécanisme Penultimate Hop Popping (PHP)**
+PHP est le mécanisme par lequel le routeur avant-dernier supprime l'étiquette MPLS avant d'envoyer au routeur de destination final pour alléger le routeur de destination.
 ```bash
 PE1# show mpls forwarding-table
 ```
-*   **Cách kiểm tra:** Nhìn vào cột **Outgoing Label** hoặc **Action** cho prefix của Router đích ngay kế bên nó.
-*   **Dấu hiệu nhận biết:** Nếu bạn thấy chữ **Pop Label** hoặc **Untagged** khi đích đến là mạng trực tiếp của router láng giềng, thì đó chính là cơ chế **PHP** đang hoạt động.
+*   **Méthode de vérification:** Regardez la colonne **Outgoing Label** ou **Action** pour le préfixe du routeur de destination adjacent.
+*   **Signe de reconnaissance:** Si vous voyez **Pop Label** ou **Untagged** lorsque la destination est un réseau direct d'un routeur voisin, alors le mécanisme **PHP** fonctionne.
 
-**Ví dụ:** Tại P1, khi kiểm tra đường đi tới `10.10.10.2/32` (Loopback của RR), nếu P1 thấy `Pop Label` cho chặng tới RR, nghĩa là P1 (hop kề cuối) đang thực hiện PHP cho RR.
+**Exemple:** À P1, lors de la vérification du chemin vers `10.10.10.3/32` (Loopback du RR), si P1 voit `Pop Label` pour le saut vers RR, cela signifie que P1 (avant-dernier saut) effectue PHP pour RR.
 
 ---
 
-### **Mẹo nhỏ:**
-Nếu bạn thực hiện lệnh `ping` giữa các Loopback, hãy thử dùng lệnh `traceroute`:
+### **Astuce:**
+Si vous exécutez la commande `ping` entre les Loopback, essayez la commande `traceroute`:
 ```bash
 PE1# traceroute 10.10.10.5 source Loopback0
 ```
-Nếu kết quả hiển thị các giá trị nhãn (ví dụ: `MPLS label 16`), điều đó chứng tỏ gói tin đang được truyền tải bằng nhãn MPLS thay vì IP routing thuần túy.
-```
-Bảng `show mpls forwarding-table` (LFIB - Label Forwarding Information Base) là "trái tim" của việc chuyển mạch nhãn. Nó cho Router biết: "Nếu gói tin đến với nhãn X, tôi phải làm gì tiếp theo?".
-
-Dưới đây là cách đọc chi tiết từng cột dựa trên kết quả của bạn tại **P1**:
+Si le résultat affiche des valeurs d'étiquette (par exemple: `MPLS label 16`), cela prouve que le paquet est transporté par étiquette MPLS plutôt que par routage IP pur.
 
 ---
 
-### **1. Ý nghĩa các cột chính**
-*   **Local Label**: Nhãn mà **P1 tự sinh ra** và quảng bá cho các router hàng xóm (neighbor). Khi hàng xóm gửi gói tin đến P1 với nhãn này, P1 sẽ biết nó cần xử lý cho Prefix tương ứng.
-*   **Outgoing Label**: Hành động tiếp theo của P1. 
-    *   **Pop Label**: Gỡ bỏ nhãn.
-    *   **Số cụ thể (ví dụ: 21)**: Thay thế nhãn cũ bằng nhãn mới này (Swap).
-*   **Prefix or Tunnel Id**: Đích đến của gói tin (thường là các Loopback IP hoặc các mạng kết nối giữa các router).
-*   **Bytes Label Switched**: Lượng dữ liệu thực tế đã được chuyển mạch qua nhãn này.
-*   **Outgoing interface & Next Hop**: Cổng vật lý và địa chỉ IP của router kế tiếp để đẩy gói tin đi.
+### **Compréhension de la table `show mpls forwarding-table` (LFIB)**
+
+La table `show mpls forwarding-table` (LFIB - Label Forwarding Information Base) est le "cœur" de la commutation d'étiquettes. Elle indique au routeur: "Si un paquet arrive avec l'étiquette X, que dois-je faire ensuite?"
+
+Voici comment lire en détail chaque colonne en fonction de vos résultats à **P1**:
 
 ---
 
-### **2. Phân tích các dòng cụ thể (Case Study)**
+### **1. Signification des colonnes principales**
+*   **Local Label**: L'étiquette que **P1 génère lui-même** et annonce aux routeurs voisins (neighbor). Lorsqu'un voisin envoie un paquet à P1 avec cette étiquette, P1 sait qu'il doit la traiter pour le Préfixe correspondant.
+*   **Outgoing Label**: L'action suivante de P1. 
+    *   **Pop Label**: Suppression de l'étiquette.
+    *   **Nombre spécifique (par exemple: 21)**: Remplacer l'étiquette ancienne par cette nouvelle étiquette (Swap).
+*   **Prefix or Tunnel Id**: La destination du paquet (généralement des adresses IP Loopback ou des réseaux reliant les routeurs).
+*   **Bytes Label Switched**: La quantité réelle de données commutées via cette étiquette.
+*   **Outgoing interface & Next Hop**: Le port physique et l'adresse IP du routeur suivant pour envoyer le paquet.
 
-#### **Trường hợp 1: Cơ chế PHP (Penultimate Hop Popping)**
-> `16 | Pop Label | 10.10.10.2/32 | Fa0/0 | 10.10.1.2`
+---
 
-*   **Giải thích**: Khi P1 nhận được gói tin có nhãn **16**, nó biết đích đến là `10.10.10.2` (Router RR). 
-*   **Hành động**: Vì Outgoing Label là **Pop Label**, P1 sẽ **gỡ nhãn** và đẩy gói tin IP thuần túy đến RR qua cổng `Fa0/0`.
-*   **Tại sao?**: Vì P1 là "hop kề cuối" (Penultimate Hop) của RR. Nó gỡ nhãn trước để RR không phải xử lý nhãn nữa, giúp RR chạy nhanh hơn.
+### **2. Analyse de cas spécifiques (Case Study)**
 
-#### **Trường hợp 2: Cân bằng tải (Load Balancing)**
+#### **Cas 1: Mécanisme PHP (Penultimate Hop Popping)**
+> `16 | Pop Label | 10.10.10.3/32 | Fa0/0 | 10.10.1.9`
+
+*   **Explication**: Quand P1 reçoit un paquet avec l'étiquette **16**, il sait que la destination est `10.10.10.3` (Routeur RR). 
+*   **Action**: Parce que Outgoing Label est **Pop Label**, P1 va **supprimer l'étiquette** et envoyer le paquet IP pur au RR via le port `Fa0/0`.
+*   **Pourquoi?**: Parce que P1 est le "saut avant-dernier" (Penultimate Hop) du RR. Il supprime l'étiquette d'abord pour que RR n'ait pas à la traiter, ce qui aide RR à fonctionner plus vite.
+
+#### **Cas 2: Équilibrage de charge (Load Balancing)**
 > `17 | Pop Label | 10.10.1.12/30 | Fa0/0 & Gi1/0`
 
-*   **Giải thích**: Để đi đến mạng `10.10.1.12/30` (link giữa RR và P2), P1 có 2 đường đi qua RR (`Fa0/0`) hoặc qua P2 (`Gi1/0`). OSPF đã tính toán chi phí bằng nhau nên MPLS cũng hỗ trợ cân bằng tải tại đây.
+*   **Explication**: Pour atteindre le réseau `10.10.1.12/30` (lien entre RR et P2), P1 a 2 routes via RR (`Fa0/0`) ou via P2 (`Gi1/0`). OSPF a calculé le coût identique donc MPLS supporte aussi l'équilibrage de charge ici.
 
-#### **Trường hợp 3: Chuyển đổi nhãn (Label Swap)**
+#### **Cas 3: Remplacement d'étiquette (Label Swap)**
 > `21 | 21 | 10.10.10.5/32 | Gi1/0 | 10.10.1.6`
 
-*   **Giải thích**: Đây là dòng thú vị nhất. Đích đến là `10.10.10.5` (Router PE2).
-*   **Hành động**: Khi gói tin đến P1 với nhãn **21** (Local), P1 nhìn vào bảng và thấy Router P2 (`10.10.1.6`) yêu cầu dùng nhãn **21** (Outgoing) để tới PE2.
-*   **Kết quả**: P1 thực hiện hành động **Swap** (thực tế là giữ nguyên giá trị 21 nhưng về bản chất là thay nhãn của mình bằng nhãn của neighbor) và đẩy đi qua cổng `Gi1/0`.
+*   **Explication**: C'est la ligne la plus intéressante. La destination est `10.10.10.5` (Routeur PE2).
+*   **Action**: Quand un paquet arrive à P1 avec l'étiquette **21** (Local), P1 regarde dans la table et voit que le Routeur P2 (`10.10.1.6`) demande d'utiliser l'étiquette **21** (Outgoing) pour aller à PE2.
+*   **Résultat**: P1 effectue l'action **Swap** (garder effectivement la valeur 21 mais essentiellement remplacer sa propre étiquette par celle du voisin) et envoie via le port `Gi1/0`.
 
 ---
 
-### **3. Tổng kết trạng thái mạng của bạn**
-*   **P1 đã học đủ nhãn**: Nó có nhãn cho tất cả các Loopback từ .1 đến .5.
-*   **Lưu lượng đang chạy**: Cột `Bytes Switched` ở dòng nhãn 19, 20, 21 có số (570, 1302, 360). Điều này chứng tỏ bạn đã thực hiện `ping` hoặc `traceroute` giữa các Router PE, và dữ liệu **thực sự đang đi bằng nhãn MPLS**.
-*   **Cấu trúc liên kết**: P1 đóng vai trò là "ngã tư". Nó kết nối trực tiếp với RR (qua Fa0/0), P2 (qua Gi1/0) và PE1 (qua Gi2/0).
-
-Bạn có muốn tôi hướng dẫn cách kiểm tra xem một gói tin cụ thể (ví dụ từ PE1 sang PE2) sẽ bị thay đổi nhãn như thế nào qua từng trạm không?
+### **3. Résumé de l'état de votre réseau**
+*   **P1 a appris toutes les étiquettes**: Il a les étiquettes pour tous les Loopback de .1 à .5.
+*   **Le trafic fonctionne**: La colonne `Bytes Switched` aux lignes 19, 20, 21 a des chiffres (570, 1302, 360). Cela prouve que vous avez exécuté `ping` ou `traceroute` entre les Routeurs PE, et les données **vont réellement via étiquette MPLS**.
+*   **Structure de connexion**: P1 joue le rôle de "carrefour". Il se connecte directement au RR (via Fa0/0), P2 (via Gi1/0) et PE1 (via Gi2/0).

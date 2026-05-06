@@ -135,5 +135,3 @@ Avant de passer à la Phase 3, assurez-vous que les points finaux (Loopback des 
 1.  Si BGP ne monte pas (`Idle`): Vérifiez OSPF (`show ip route`) pour voir si vous pouvez voir les adresses IP Loopback les uns des autres.
 2.  Si BGP est `Established` mais ping traceroute ne montre pas d'étiquette: Vérifiez LDP (`show mpls interfaces`).
 3.  Si RR n'envoie pas de route aux PE: Vérifiez la commande `route-reflector-client` sur RR.
-
-Avez-vous vérifié la commande `show bgp vpnv4 unicast all summary`? Quel est actuellement le résultat de la colonne **PfxRcd**?
