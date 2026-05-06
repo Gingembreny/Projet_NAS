@@ -1,32 +1,32 @@
-Để hoàn thành **Phase 2**, bạn cần tập trung vào việc thiết lập **iBGP VPNv4** giữa các PE và RR để làm "đường ống" vận chuyển dữ liệu khách hàng. Các router trung gian (P1, P2) sẽ không chạy BGP.
+Dès de finaliser la **Phase 2**, vous devez vous concentrer sur l'établissement du **iBGP VPNv4** entre les PE et RR pour créer un "tunnel" de transport des données client. Les routeurs intermédiaires (P1, P2) n'exécuteront pas BGP.
 
 Dưới đây là chi tiết cấu hình cho từng loại router dựa trên sơ đồ AS111 của bạn:
 
 ---
 
-### **1. Cấu hình trên Route Reflector (RR - 10.10.10.2)**
+### **1. Configuration sur Route Reflector (RR - 10.10.10.3)**
 RR đóng vai trò là "điểm hội tụ" thông tin định tuyến. Thay vì PE1 và PE2 phải kết nối trực tiếp, chúng chỉ cần kết nối tới RR.
 
 
 
 ```bash
 RR# configure terminal
-RR(config)# router bgp 111wwr
+RR(config)# router bgp 111
 RR(config-router)# bgp log-neighbor-changes 
 #Mặc định, BGP là một giao thức khá "im lặng". Nếu một kết nối BGP giữa PE và RR bị đứt (Down) hoặc được thiết lập lại (Up), Router có thể không hiển thị thông báo gì ra màn hình console.Khi có lệnh này: Mọi thay đổi về trạng thái của các láng giềng BGP (Neighbor) sẽ được Router ghi lại và hiển thị ngay lập tức dưới dạng các dòng thông báo hệ thống (Syslog).
-! --- Thiết lập láng giềng với PE1 ---
-RR(config-router)# neighbor 10.10.10.4 remote-as 111
-RR(config-router)# neighbor 10.10.10.4 update-source Loopback0
-! --- Thiết lập láng giềng với PE2 ---
+! --- Établir un voisin avec PE1 ---
+RR(config-router)# neighbor 10.10.10.1 remote-as 111
+RR(config-router)# neighbor 10.10.10.1 update-source Loopback0
+! --- Établir un voisin avec PE2 ---
 RR(config-router)# neighbor 10.10.10.5 remote-as 111
 RR(config-router)# neighbor 10.10.10.5 update-source Loopback0
 !
 RR(config-router)# address-family vpnv4
-! --- Kích hoạt tính năng phản xạ (Reflection) cho PE1 ---
-RR(config-router-af)# neighbor 10.10.10.4 activate
-RR(config-router-af)# neighbor 10.10.10.4 send-community both
-RR(config-router-af)# neighbor 10.10.10.4 route-reflector-client
-! --- Kích hoạt tính năng phản xạ cho PE2 ---
+! --- Activer la réflexion (Reflection) pour PE1 ---
+RR(config-router-af)# neighbor 10.10.10.1 activate
+RR(config-router-af)# neighbor 10.10.10.1 send-community both
+RR(config-router-af)# neighbor 10.10.10.1 route-reflector-client
+! --- Activer la réflexion pour PE2 ---
 RR(config-router-af)# neighbor 10.10.10.5 activate
 RR(config-router-af)# neighbor 10.10.10.5 send-community both
 RR(config-router-af)# neighbor 10.10.10.5 route-reflector-client
@@ -35,105 +35,105 @@ RR(config-router-af)# exit-address-family
 
 ---
 
-### **2. Cấu hình trên các Provider Edge (PE1 & PE2)**
-Các PE sẽ gửi thông tin mạng của khách hàng (sau này ở Phase 3) lên RR.
+### **2. Configuration sur les Provider Edge (PE1 et PE2)**
+Les PE enverront les informations de réseau du client (plus tard en Phase 3) au RR.
 
-*   **Tại PE1 (10.10.10.4):**
+*   **Sur PE1 (10.10.10.1):**
 ```bash
 PE1(config)# router bgp 111
-PE1(config-router)# neighbor 10.10.10.2 remote-as 111
-PE1(config-router)# neighbor 10.10.10.2 update-source Loopback0
+PE1(config-router)# neighbor 10.10.10.3 remote-as 111
+PE1(config-router)# neighbor 10.10.10.3 update-source Loopback0
 PE1(config-router)# address-family vpnv4
-PE1(config-router-af)# neighbor 10.10.10.2 activate
-PE1(config-router-af)# neighbor 10.10.10.2 send-community both
+PE1(config-router-af)# neighbor 10.10.10.3 activate
+PE1(config-router-af)# neighbor 10.10.10.3 send-community both
 PE1(config-router-af)# exit-address-family
 ```
 
-*   **Tại PE2 (10.10.10.5):**
-*(Cấu hình tương tự PE1, trỏ neighbor về IP của RR là 10.10.10.2)*
+*   **Sur PE2 (10.10.10.5):**
+*(Configuration similaire à PE1, pointant le voisin vers l'IP du RR 10.10.10.3)*
 
 ---
 
-### **3. Cấu hình trên các Provider Router (P1 & P2)**
-**Lưu ý cực kỳ quan trọng:** Các router P **KHÔNG** chạy BGP. Nhiệm vụ của chúng trong Phase 2 chỉ là đảm bảo MPLS LDP chạy thông suốt để vận chuyển gói tin dựa trên nhãn.
+### **3. Configuration sur les routeurs Provider (P1 et P2)**
+**Note extrêmement importante:** Les routeurs P n'exécutent **PAS** BGP. Leur seule tâche dans la Phase 2 est de s'assurer que LDP MPLS s'exécute sans interruption pour transporter les paquets en fonction des étiquettes.
 
-Nếu bạn đã làm xong phần Addressing, OSPF và MPLS ở bước trước, thì ở Phase 2 này bạn **không cần gõ thêm lệnh gì** trên P1 và P2.
+Si vous avez déjà terminé la section Adressage, OSPF et MPLS à l'étape précédente, alors à cette Phase 2 vous n'avez **pas besoin de taper d'autres commandes** sur P1 et P2.
 
 ---
 
-### **4. Kiểm tra trạng thái (Validation)**
-Sau khi cấu hình xong, bạn phải kiểm tra các tiêu chí sau:
+### **4. Vérification de l'état (Validation)**
+Après configuration, vous devez vérifier les critères suivants:
 
-1.  **Kiểm tra phiên BGP (Trên RR):**
+1.  **Vérifier la session BGP (Sur RR):**
     `RR# show bgp vpnv4 unicast all summary`
-    *Trạng thái (State/PfxRcd) phải là một con số (thường là 0 nếu chưa có khách hàng), không được là "Idle" hay "Active".*
+    *L'état (State/PfxRcd) doit être un nombre (généralement 0 si pas de client encore), pas "Idle" ou "Active".*
 
-2.  **Kiểm tra khả năng vận chuyển nhãn (Trên bất kỳ router nào):**
+2.  **Vérifier la capacité de transport d'étiquettes (Sur n'importe quel routeur):**
     `P1# show mpls forwarding-table`
-    *Bạn phải thấy các nhãn cho địa chỉ Loopback của PE1 (10.10.10.4) và PE2 (10.10.10.5).*
+    *Vous devez voir les étiquettes pour les adresses Loopback de PE1 (10.10.10.1) et PE2 (10.10.10.5).*
 
-### **Tại sao lại dùng Loopback cho BGP?**
-Vì địa chỉ Loopback luôn ở trạng thái "Up" miễn là router còn chạy. Nếu một đường dây vật lý giữa P1 và RR bị đứt, OSPF sẽ tìm đường vòng qua P2, và phiên BGP vẫn được duy trì nhờ IP Loopback không đổi.
+### **Pourquoi utiliser Loopback pour BGP?**
+Parce que l'adresse Loopback est toujours "Up" tant que le routeur fonctionne. Si une ligne physique entre P1 et RR est coupée, OSPF trouvera une route alternative via P2, et la session BGP sera maintenue grâce à l'IP Loopback inchangée.
 
-Bạn đã sẵn sàng để chuyển sang **Phase 3** (cấu hình VRF cho khách hàng) chưa?
-Sau khi cấu hình xong **Phase 2**, bạn cần sử dụng một bộ lệnh kiểm tra (verification) theo từng lớp để đảm bảo "đường ống" BGP VPNv4 đã sẵn sàng trước khi sang Phase 3.
+Êtes-vous prêt à passer à la **Phase 3** (configuration VRF pour les clients)?
+Après avoir complété la **Phase 2**, vous devez utiliser un ensemble de commandes de vérification (verification) couche par couche pour assurer que le "tunnel" BGP VPNv4 est prêt avant de passer à la Phase 3.
 
 Dưới đây là các lệnh quan trọng nhất phân theo mục đích:
 
-### **1. Kiểm tra trạng thái láng giềng BGP (Quan trọng nhất)**
-Lệnh này giúp bạn biết các PE và RR đã thực sự kết nối được với nhau ở tầng BGP chưa.
+### **1. Vérifier l'état du voisin BGP (Le plus important)**
+Cette commande vous aide à savoir si les PE et RR se sont réellement connectés au niveau BGP.
 
-*   **Lệnh:** `show bgp vpnv4 unicast all summary`
-*   **Nơi thực hiện:** Trên **RR** hoặc các **PE**.
-*   **Dấu hiệu thành công:** 
-    *   Cột **State/PfxRcd** phải là một con số (ví dụ: `0`). 
-    *   Nếu hiển thị `Active`, `Idle` hoặc `Connect`, nghĩa là phiên BGP chưa thiết lập được (thường do lỗi định tuyến OSPF không thông Loopback hoặc sai địa chỉ Neighbor).
-
-
-
----
-
-### **2. Kiểm tra chi tiết cấu hình Neighbor**
-Để xem RR đã nhận diện đúng các PE là "Client" chưa (vì Phase 2 yêu cầu Route Reflector).
-
-*   **Lệnh:** `show bgp vpnv4 unicast all neighbors [IP_Neighbor]`
-*   **Ví dụ (trên RR):** `show bgp vpnv4 unicast all neighbors 10.10.10.4`
-*   **Dấu hiệu thành công:** Tìm dòng chữ **"Route-reflector client"** trong kết quả trả về. Điều này xác nhận RR sẽ phản xạ route cho PE này.
-
----
-
-### **3. Kiểm tra khả năng vận chuyển nhãn MPLS (LDP)**
-BGP VPNv4 cần nhãn MPLS để chuyển tiếp dữ liệu qua các router P. Nếu LDP không chạy, BGP có thể Up nhưng dữ liệu sẽ bị rớt (drop) ở các router P1, P2.
-
-*   **Lệnh:** `show mpls ldp neighbor`
-*   **Dấu hiệu thành công:** Trạng thái phải là **"Oper"** (Operational).
-*   **Lệnh bổ trợ:** `show mpls forwarding-table`
-    *   Đảm bảo bạn thấy nhãn cho các địa chỉ Loopback của các Router đối diện (ví dụ từ PE1 phải thấy nhãn để tới 10.10.10.5 của PE2).
+*   **Commande:** `show bgp vpnv4 unicast all summary`
+*   **Exécuter sur:** **RR** ou les **PE**.
+*   **Signe de succès:** 
+    *   La colonne **State/PfxRcd** doit être un nombre (par exemple: `0`). 
+    *   Si elle affiche `Active`, `Idle` ou `Connect`, cela signifie que la session BGP n'a pas pu s'établir (généralement due à une erreur de routage OSPF qui ne passe pas Loopback ou une adresse voisin incorrecte).
 
 
 
 ---
 
-### **4. Kiểm tra bảng định tuyến VPNv4**
-Ở Phase 2, bảng này có thể đang trống nếu bạn chưa cấu hình khách hàng (Phase 3), nhưng bạn vẫn nên biết lệnh này để kiểm tra ngay khi bắt đầu Phase 3.
+### **2. Vérifier la configuration détaillée du voisin**
+Pour voir si RR a correctement identifié les PE comme "Client" (puisque la Phase 2 nécessite un Route Reflector).
 
-*   **Lệnh:** `show bgp vpnv4 unicast all`
-*   **Ý nghĩa:** Hiển thị tất cả các tuyến đường VPNv4 mà Router đang lưu giữ (bao gồm cả Route Distinguisher và VPN Label).
-
----
-
-### **5. Kiểm tra tính thông suốt (End-to-End Connectivity)**
-Trước khi sang Phase 3, hãy đảm bảo các điểm cuối (Loopback của PE) có thể giao tiếp với nhau bằng nhãn.
-
-*   **Lệnh:** `ping 10.10.10.5 source Loopback0` (từ PE1 ping sang PE2).
-*   **Lệnh nâng cao:** `traceroute 10.10.10.5 source Loopback0`
-    *   **Dấu hiệu thành công:** Bạn sẽ thấy các dòng có kèm thông tin nhãn (ví dụ: `[MPLS: Label 16 Exp 0]`). Điều này chứng tỏ gói tin đang được chuyển mạch bằng nhãn MPLS thay vì IP thông thường.
+*   **Commande:** `show bgp vpnv4 unicast all neighbors [IP_Voisin]`
+*   **Exemple (sur RR):** `show bgp vpnv4 unicast all neighbors 10.10.10.1`
+*   **Signe de succès:** Recherchez la ligne **"Route-reflector client"** dans le résultat retourné. Cela confirme que RR réfléchira les routes pour ce PE.
 
 ---
 
-### **Tóm tắt quy trình kiểm tra lỗi (Troubleshooting):**
-1.  Nếu BGP không lên (`Idle`): Kiểm tra OSPF (`show ip route`) xem có thấy IP Loopback của nhau không.
-2.  Nếu BGP đã `Established` nhưng ping traceroute không thấy nhãn: Kiểm tra LDP (`show mpls interfaces`).
-3.  Nếu RR không gửi route cho các PE: Kiểm tra lệnh `route-reflector-client` trên RR.
+### **3. Vérifier la capacité de transport d'étiquette MPLS (LDP)**
+BGP VPNv4 a besoin d'étiquettes MPLS pour acheminer les données via les routeurs P. Si LDP ne fonctionne pas, BGP peut être Up mais les données seront rejetées (drop) aux routeurs P1, P2.
 
-Bạn đã kiểm tra lệnh `show bgp vpnv4 unicast all summary` chưa? Kết quả cột **PfxRcd** hiện tại là bao nhiêu?
+*   **Commande:** `show mpls ldp neighbor`
+*   **Signe de succès:** L'état doit être **"Oper"** (Opérationnel).
+*   **Commande supplémentaire:** `show mpls forwarding-table`
+    *   Assurez-vous de voir une étiquette pour les adresses Loopback des routeurs opposés (par exemple, depuis PE1 vous devriez voir une étiquette pour aller à 10.10.10.5 de PE2).
+
+
+
+---
+
+### **4. Vérifier la table de routage VPNv4**
+En Phase 2, cette table peut être vide si vous n'avez pas encore configuré de clients (Phase 3), mais vous devez toujours connaître cette commande pour vérifier dès le début de la Phase 3.
+
+*   **Commande:** `show bgp vpnv4 unicast all`
+*   **Signification:** Affiche toutes les routes VPNv4 que le routeur stocke (incluant le Route Distinguisher et VPN Label).
+
+---
+
+### **5. Vérifier la connectivité (End-to-End Connectivity)**
+Avant de passer à la Phase 3, assurez-vous que les points finaux (Loopback des PE) peuvent communiquer les uns avec les autres avec étiquettes.
+
+*   **Commande:** `ping 10.10.10.5 source Loopback0` (depuis PE1 ping vers PE2).
+*   **Commande avancée:** `traceroute 10.10.10.5 source Loopback0`
+    *   **Signe de succès:** Vous verrez des lignes avec des informations d'étiquette (par exemple: `[MPLS: Label 16 Exp 0]`). Cela prouve que le paquet est acheminé par étiquette MPLS au lieu du routage IP normal.
+
+---
+
+### **Résumé du processus de vérification des erreurs (Troubleshooting):**
+1.  Si BGP ne monte pas (`Idle`): Vérifiez OSPF (`show ip route`) pour voir si vous pouvez voir les adresses IP Loopback les uns des autres.
+2.  Si BGP est `Established` mais ping traceroute ne montre pas d'étiquette: Vérifiez LDP (`show mpls interfaces`).
+3.  Si RR n'envoie pas de route aux PE: Vérifiez la commande `route-reflector-client` sur RR.
+
+Avez-vous vérifié la commande `show bgp vpnv4 unicast all summary`? Quel est actuellement le résultat de la colonne **PfxRcd**?
