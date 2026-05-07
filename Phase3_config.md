@@ -14,6 +14,9 @@ ip cef
 interface Loopback0
  ip address 10.10.10.2 255.255.255.255
 !
+mpls ip
+mpls label protocol ldp
+mpls ldp router-id Loopback0 force
 interface FastEthernet0/0
  description Lien_vers_PE1
  ip address 10.10.1.2 255.255.255.252
@@ -44,6 +47,9 @@ ip cef
 interface Loopback0
  ip address 10.10.10.4 255.255.255.255
 !
+mpls ip
+mpls label protocol ldp
+mpls ldp router-id Loopback0 force
 interface FastEthernet0/0
  description Lien_vers_P1
  ip address 10.10.1.6 255.255.255.252
@@ -78,6 +84,9 @@ ip cef
 interface Loopback0
  ip address 10.10.10.3 255.255.255.255
 !
+mpls ip
+mpls label protocol ldp
+mpls ldp router-id Loopback0 force
 interface FastEthernet0/0
  description Lien_vers_PE1
  ip address 10.10.1.9 255.255.255.252
@@ -97,6 +106,7 @@ router ospf 1
  network 10.10.1.12 0.0.0.3 area 0
 !
 router bgp 111
+ bgp log-neighbor-changes 
  neighbor 10.10.10.1 remote-as 111
  neighbor 10.10.10.1 update-source Loopback0
  neighbor 10.10.10.5 remote-as 111
@@ -142,6 +152,9 @@ vrf definition AS333
 interface Loopback0
  ip address 10.10.10.1 255.255.255.255
 !
+mpls ip
+mpls label protocol ldp
+mpls ldp router-id Loopback0 force
 interface FastEthernet0/0
  description Lien_vers_P1
  ip address 10.10.1.1 255.255.255.252
@@ -167,6 +180,7 @@ interface GigabitEthernet3/0
  no shutdown
 !
 router ospf 1
+ router-id 111.0.0.1
  network 10.10.10.1 0.0.0.0 area 0
  network 10.10.1.0 0.0.0.3 area 0
  network 10.10.1.8 0.0.0.3 area 0
@@ -216,6 +230,9 @@ vrf definition AS333
 interface Loopback0
  ip address 10.10.10.5 255.255.255.255
 !
+mpls ip
+mpls label protocol ldp
+mpls ldp router-id Loopback0 force
 interface FastEthernet0/0
  description Lien_vers_RR
  ip address 10.10.1.14 255.255.255.252
@@ -241,6 +258,7 @@ interface GigabitEthernet3/0
  no shutdown
 !
 router ospf 1
+ router-id 111.0.0.5
  network 10.10.10.5 0.0.0.0 area 0
  network 10.10.1.12 0.0.0.3 area 0
  network 10.10.1.16 0.0.0.3 area 0

@@ -5,16 +5,19 @@ import json
 import os
 
 # --- Configuration des Chemins ---
-CHEMIN_PROJET = "/Users/gaillardou/Desktop/gns/testfinal/project-files/dynamips/"
+CHEMIN_PROJET = "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/"
 FICHIER_JSON = "config_final.json"
 
 mapping_routeur_uuid = {
-    "PE1": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/3a059d65-05f2-4abd-a421-2534fa565e97",
-    "P1": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/81f36527-0efe-4ada-b429-77b425b5b8b1",
-    "P2": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/81f36527-0efe-4ada-b429-77b425b5b8b1",
-    "P3": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/65a3a450-a200-4ab8-bb2a-67cc36b0bed7",
-    "PE2": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/ad0c50d6-85f9-4965-8b7d-4f4bc5a98c2a",
-    "RR": "/Users/gaillardou/Desktop/GitHub/Projet_NAS/NAS_gns/project-files/dynamips/22d9e17b-923e-47c4-a224-686e371a1472"
+    "PE1": "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/c3c86241-71c6-4c8d-87eb-f84e39aabaa1",
+    "P1": "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/10fc1558-c7d4-4bdd-a317-d54aae0ff5dc",
+    "P2": "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/6acfe332-8b83-48b8-b1b1-b99e95fb572f",
+    "PE2": "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/4420ac89-323f-4b47-b73f-d809d207a496",
+    "RR": "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/cf17a70a-651d-4cab-9873-3718e6f4aa15",
+    "CE1": "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/da21e3b4-6bbe-4f49-b2b4-a5c565e72e15",
+    "CE2": "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/9ff78be6-28f7-41f7-900b-d8d6ae746aab",
+    "CE3": "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/12b5e465-0040-4d42-98e1-887fcf777bff",
+    "CE4": "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/49533786-867c-47c0-99c2-d99237cc1987",
 }
 
 with open(FICHIER_JSON, "r") as f:
@@ -194,7 +197,7 @@ def generer_config(nom_r):
     "route-map EXPORT_TO_CUSTOMER permit 50",
     "!"
 ]
-    return "\n".join(config)
+    return "/n".join(config)
 
 
 
