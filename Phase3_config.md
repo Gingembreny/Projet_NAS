@@ -197,11 +197,13 @@ router bgp 111
  address-family ipv4 vrf AS222
   neighbor 10.20.1.22 remote-as 222
   neighbor 10.20.1.22 activate
+  neighbor 10.20.1.22 as-override
  exit-address-family
  !
  address-family ipv4 vrf AS333
   neighbor 10.30.1.30 remote-as 333
   neighbor 10.30.1.30 activate
+  neighbor 10.30.1.30 as-override
  exit-address-family
 end
 wr
@@ -275,11 +277,13 @@ router bgp 111
  address-family ipv4 vrf AS222
   neighbor 10.20.1.26 remote-as 222
   neighbor 10.20.1.26 activate
+  neighbor 10.20.1.26 as-override
  exit-address-family
  !
  address-family ipv4 vrf AS333
   neighbor 10.30.1.34 remote-as 333
   neighbor 10.30.1.34 activate
+  neighbor 10.30.1.34 as-override
  exit-address-family
 end
 wr
@@ -300,6 +304,7 @@ interface FastEthernet0/0
  ip address 10.20.1.22 255.255.255.252
  no shutdown
 router bgp 222
+ router-id 222.0.0.6
  neighbor 10.20.1.21 remote-as 111
  network 10.20.10.6 mask 255.255.255.255
 end
@@ -316,6 +321,7 @@ interface FastEthernet0/0
  ip address 10.30.1.30 255.255.255.252
  no shutdown
 router bgp 333
+ router-id 333.0.0.8
  neighbor 10.30.1.29 remote-as 111
  network 10.30.10.8 mask 255.255.255.255
 end
@@ -332,6 +338,7 @@ interface FastEthernet0/0
  ip address 10.20.1.26 255.255.255.252
  no shutdown
 router bgp 222
+ router-id 222.0.0.7
  neighbor 10.20.1.25 remote-as 111
  network 10.20.10.7 mask 255.255.255.255
 end
@@ -348,6 +355,7 @@ interface FastEthernet0/0
  ip address 10.30.1.34 255.255.255.252
  no shutdown
 router bgp 333
+ router-id 333.0.0.9
  neighbor 10.30.1.33 remote-as 111
  network 10.30.10.9 mask 255.255.255.255
 end

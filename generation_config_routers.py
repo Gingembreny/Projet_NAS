@@ -6,7 +6,7 @@ import os
 
 # --- Configuration des Chemins ---
 CHEMIN_PROJET = "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/"
-FICHIER_JSON = "config_final.json"
+FICHIER_JSON = "config_final_v2.json"
 
 mapping_routeur_uuid = {
     "PE1": "/Users/tungd/GNS3/projects/PROJET/GNS_NAS/NAS_gns/project-files/dynamips/c3c86241-71c6-4c8d-87eb-f84e39aabaa1",
@@ -25,8 +25,8 @@ with open(FICHIER_JSON, "r") as f:
 
 def get_router_info(nom_r):
     for as_nom, as_data in donnees["as"].items():
-        if nom_r in as_data["router"]:
-            return as_data, as_data["router"][nom_r]
+        if nom_r in as_data["routers"]:
+            return as_data, as_data["routers"][nom_r]
 
 def generer_config(nom_r):
     as_data, r_data = get_router_info(nom_r)
@@ -91,7 +91,7 @@ def generer_config(nom_r):
     config += [f"router bgp {as_num}", f" bgp router-id {r_data['router_id']}", " no bgp default ipv4-unicast"]
             
     # voisins iBGP 
-    for autre_r, autre_data in as_data["router"].items():
+    for autre_r, autre_data in as_data["routers"].items():
         if autre_r != nom_r:
             v_ip = autre_data['loopback'].split("/")[0]
             config.append(f" neighbor {v_ip} remote-as {as_num}")
@@ -102,8 +102,8 @@ def generer_config(nom_r):
         nom_voisin = i['voisin']
         relation = i.get('relation') # 'customer', 'peer', ou 'provider'
         for as_name, as_voisin_data in donnees["as"].items():
-            if nom_voisin in as_voisin_data["router"]:
-                voisin_router = as_voisin_data["router"][nom_voisin]
+            if nom_voisin in as_voisin_data["routers"]:
+                voisin_router = as_voisin_data["routers"][nom_voisin]
                 num_as_v = as_voisin_data["numero_as"]
                 for intf_data in voisin_router["interface"].values():
                     if intf_data.get("voisin") == nom_r:
