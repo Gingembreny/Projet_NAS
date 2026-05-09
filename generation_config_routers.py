@@ -24,190 +24,259 @@ with open(FICHIER_JSON, "r") as f:
     donnees = json.load(f)
 
 def get_router_info(nom_r):
+    """Trouver les infos du routeur dans le JSON"""
     for as_nom, as_data in donnees["as"].items():
         if nom_r in as_data["routers"]:
             return as_data, as_data["routers"][nom_r]
+    return None, None
+
+
+def get_ce_vrf_type(ce_nom):
+    """Déterminer le type VRF d'un CE (AS222 ou AS333)"""
+    for topo in donnees["as"]["as111"]["topologie_client"]:
+        for pe_nom, ce_list in topo.items():
+            if ce_nom in ce_list:
+                return topo["numero_as"]
+    return None
+
+
+def get_neighbor_loopback(neighbor_name):
+    """Obtenir l'adresse loopback d'un voisin"""
+    for as_nom, as_data in donnees["as"].items():
+        if neighbor_name in as_data["routers"]:
+            return as_data["routers"][neighbor_name]["adresse_loopback"].split('/')[0]
+    return None
+
+
+def get_neighbor_router_id(neighbor_name):
+    """Obtenir le router-id d'un voisin"""
+    for as_nom, as_data in donnees["as"].items():
+        if neighbor_name in as_data["routers"]:
+            return as_data["routers"][neighbor_name]["router_id"]
+    return None
+
+
+def cidr_to_netmask(cidr_str):
+    """Convertir format CIDR à format netmask"""
+    ip_part, prefix = cidr_str.split('/')
+    prefix = int(prefix)
+    
+    if prefix == 32:
+        return f"{ip_part} 255.255.255.255"
+    elif prefix == 30:
+        return f"{ip_part} 255.255.255.252"
+    elif prefix == 24:
+        return f"{ip_part} 255.255.255.0"
+    else:
+        # Calcul générique
+        mask = (0xffffffff >> (32 - prefix)) << (32 - prefix)
+        octets = [(mask >> (24 - i*8)) & 0xff for i in range(4)]
+        return f"{ip_part} {'.'.join(map(str, octets))}"
+
+
+def vrf_config(vrf_name, rd, rt_import, rt_export):
+    """Générer la config VRF"""
+    config = [
+        f"vrf definition {vrf_name}",
+        f" rd {rd}",
+        f" route-target import {rt_import}",
+        f" route-target export {rt_export}",
+        " address-family ipv4",
+        " exit-address-family",
+        "!"
+    ]
+    return "\n".join(config)
+
 
 def generer_config(nom_r):
+    """Générer la configuration complète pour un routeur"""
     as_data, r_data = get_router_info(nom_r)
+    
+    if as_data is None or r_data is None:
+        return None
+    
     as_num = as_data["numero_as"]
-    igp = as_data["protocole_igp"]
+    config_lines = []
     
-    config = [
-        "!", f"hostname {nom_r}", "!",
-         "ipv6 unicast-routing", "ip bgp-community new-format","!"
+    config_lines += [
+        "!",
+        f"hostname {nom_r}",
+        "!"
     ]
-
-    # interface physique
-    ebgp_voisins = []
-    ebgp_phys_ips = [] 
     
-    for int_name, details in r_data["interface"].items():
-        if details != {}:
-            config += [
-                f"interface {int_name}",
-                " no ip address", " ipv6 enable",
-                f" ipv6 address {details['adresse_ip']}"
-            ]
-            # changement métrique ospf
-            if 'cost' in details:
-                config.append(f" ipv6 ospf cost {details['cost']}")
-            
-            # active rip ou ospf
-            if igp == "rip": 
-                config.append(f" ipv6 rip {as_num} enable")
-            elif igp == "ospf": 
-                config.append(f" ipv6 ospf {as_num} area 0")
-            
-            # vérifie lien ebgp
-            if 'relation' in details:
-                ebgp_voisins.append(details)
-           
-            config.append(" no shutdown")
-            config.append("!")
-
-    # interface loopback
-    config += [f"interface Loopback0", f" ipv6 address {r_data['loopback']}", " no ip address", " ipv6 enable"]
-    if igp == "rip": 
-        config.append(f" ipv6 rip {as_num} enable")
-    elif igp == "ospf": 
-        config.append(f" ipv6 ospf {as_num} area 0")
+    if nom_r not in ["CE1", "CE2", "CE3", "CE4"]:
+        config_lines.append("ip cef")
+        config_lines.append("!")
     
-    # igp
-    if igp == "rip":
-        config += ["!", f"ipv6 router rip {as_num}"]
-    else:
-        config += ["!", f"ipv6 router ospf {as_num}", f" router-id {r_data['router_id']}"]
-
-    config.append('!')
+    if nom_r in ["PE1", "PE2"]:
+        config_lines.append(vrf_config("AS222", "111:222", "111:222", "111:222"))
+        config_lines.append(vrf_config("AS333", "111:333", "111:333", "111:333"))
     
-    # on verifie si on a des clients sur ce lien
-    reseaux_clients_locaux = []
-    for int_name, details in r_data["interface"].items():
-        if details.get('relation') == 'customer':
-            reseaux_clients_locaux.append(details['adresse_ip']) #on récupère l'@ ip
-            
-    # bgp
-    config += [f"router bgp {as_num}", f" bgp router-id {r_data['router_id']}", " no bgp default ipv4-unicast"]
-            
-    # voisins iBGP 
-    for autre_r, autre_data in as_data["routers"].items():
-        if autre_r != nom_r:
-            v_ip = autre_data['loopback'].split("/")[0]
-            config.append(f" neighbor {v_ip} remote-as {as_num}")
-            config.append(f" neighbor {v_ip} update-source Loopback0")
-    
-    # voisins eBGP
-    for i in ebgp_voisins:
-        nom_voisin = i['voisin']
-        relation = i.get('relation') # 'customer', 'peer', ou 'provider'
-        for as_name, as_voisin_data in donnees["as"].items():
-            if nom_voisin in as_voisin_data["routers"]:
-                voisin_router = as_voisin_data["routers"][nom_voisin]
-                num_as_v = as_voisin_data["numero_as"]
-                for intf_data in voisin_router["interface"].values():
-                    if intf_data.get("voisin") == nom_r:
-                        p_ip = intf_data["adresse_ip"].split("/")[0]
-                        config.append(f" neighbor {p_ip} remote-as {num_as_v}")
-                        ebgp_phys_ips.append((p_ip,relation))
-                        break
 
-    # address family-ipv6
-    prefixe_as = as_data["adresse_reseau"] 
+    config_lines += [
+        "interface Loopback0",
+        f" ip address {cidr_to_netmask(r_data['adresse_loopback'])}"
+    ]
     
+    if nom_r not in ["CE1", "CE2", "CE3", "CE4"]:
+        config_lines.append(" no shutdown")
     
-    config.append(" address-family ipv6")
-    config.append(f"  network {prefixe_as}:/48")
+    config_lines.append("!")
 
-    # active voisins iBGP 
-    for autre_r, autre_data in as_data["router"].items():
-        if autre_r != nom_r:
-            v_ip = autre_data['loopback'].split("/")[0]
-            config.append(f"  neighbor {v_ip} activate") 
-            config.append(f"  neighbor {v_ip} next-hop-self")
-            config.append(f"  neighbor {v_ip} send-community both")
-
-    # active voisins eBGP
-    for p_ip, relation in ebgp_phys_ips:
-        config.append(f"  neighbor {p_ip} activate")
-        config.append(f"  neighbor {p_ip} send-community both")
+    
+    # mpls et ospf 
+    if nom_r in ["P1", "P2", "PE1", "PE2", "RR"]:
+        config_lines += [
+            "mpls ip",
+            "mpls label protocol ldp",
+            "mpls ldp router-id Loopback0 force",
+            "!"
+        ]
         
-        if relation == "customer":
-            config.append(f"  neighbor {p_ip} route-map TAG_IN_CUSTOMER in") #marque comme client
-            config.append(f"  neighbor {p_ip} route-map EXPORT_TO_CUSTOMER out") #envoie tout ce que l'on a 
-        elif relation == "peer":
-            config.append(f"  neighbor {p_ip} route-map TAG_IN_PEER in")
-            config.append(f"  neighbor {p_ip} route-map EXPORT_TO_NON_CUSTOMER out")
-        elif relation == "provider":
-            config.append(f"  neighbor {p_ip} route-map TAG_IN_PROVIDER in")
-            config.append(f"  neighbor {p_ip} route-map EXPORT_TO_NON_CUSTOMER out")
+        config_lines += [
+            "router ospf 1",
+            f" router-id {r_data['router_id']}"
+        ]
+        
 
-    config.append(" exit-address-family")
-    config.append("!")
-    config.append(f"ipv6 route {prefixe_as}:/48 null0")
-    config.append("!")
+        loopback_ip = r_data['adresse_loopback'].split('/')[0]
+        config_lines.append(f" network {loopback_ip} 0.0.0.0 area 0")
+        
+        for neighbor_name, neighbor_data in r_data["voisin"].items():
+            # Skip CE neighbors (pas de OSPF pour CE)
+            if neighbor_name not in ["CE1", "CE2", "CE3", "CE4"]:
+                network = neighbor_data['reseau'].split('/')[0]
+                config_lines.append(f" network {network} 0.0.0.3 area 0")
 
-    # filtrage
+        
+        config_lines.append("!")
+    
 
-    prefixe_propre = as_data['adresse_reseau'].rstrip(':')
+    for neighbor_name, neighbor_data in r_data["voisin"].items():
+        config_lines += [
+            f"interface {neighbor_data['interface']}",
+            f" description Lien vers {neighbor_name}",
+            f" ip address {cidr_to_netmask(neighbor_data['adresse_ip'])}"
+        ]
+        
+        # vrf forwarding pour PE vers CE
+        if nom_r in ["PE1", "PE2"] and neighbor_name in ["CE1", "CE2", "CE3", "CE4"]:
+            vrf_type = get_ce_vrf_type(neighbor_name)
+            config_lines.append(f" vrf forwarding AS{vrf_type}")
+        
+        # mpls
+        if nom_r in ["P1", "P2", "PE1", "PE2", "RR"]:
+            config_lines.append(" mpls ip")
+        
+        config_lines += [
+            " no shutdown",
+            "!"
+        ]
+    
+    # bgp
+    if nom_r in ["PE1", "PE2", "RR"] or nom_r in ["CE1", "CE2", "CE3", "CE4"]:
+        config_lines += [
+            f"router bgp {as_num}"
+        ]
+        
+        # ibgp
+        if nom_r in ["PE1", "PE2", "RR"]:
+            config_lines.append(" bgp log-neighbor-changes")
+            
+            for neighbor_name, neighbor_data in r_data["voisin"].items():
+                if neighbor_name in as_data["routers"]:
+                    neighbor_loopback = get_neighbor_loopback(neighbor_name)
+                    config_lines += [
+                        f" neighbor {neighbor_loopback} remote-as {as_num}",
+                        f" neighbor {neighbor_loopback} update-source Loopback0"
+                    ]
+        
+            config_lines.append(" !")
+        
+            # Address-family pour iBGP
+            config_lines.append(" address-family vpnv4")
+            
+            for neighbor_name, neighbor_data in r_data["voisin"].items():
+                if neighbor_name in as_data["routers"]:
+                    neighbor_loopback = get_neighbor_loopback(neighbor_name)
+                    config_lines += [
+                        f"  neighbor {neighbor_loopback} activate",
+                        f"  neighbor {neighbor_loopback} send-community both"
+                    ]
+                    
+                    # Route reflector client (seulement RR)
+                    if nom_r == "RR":
+                        config_lines.append(f"  neighbor {neighbor_loopback} route-reflector-client")
+            
+            config_lines.append(" exit-address-family")
+        
+            # eBGP neighbors vers CE 
+            if nom_r in ["PE1", "PE2"]:
+                for neighbor_name, neighbor_data in r_data["voisin"].items():
+                    if neighbor_name in ["CE1", "CE2", "CE3", "CE4"]:
+                        vrf_type = get_ce_vrf_type(neighbor_name)
+                        neighbor_ip = neighbor_data['adresse_ip'].split("/")[0]
+                        
+                        config_lines += [
+                            f" !",
+                            f" address-family ipv4 vrf AS{vrf_type}",
+                            f"  neighbor {neighbor_ip} remote-as {donnees['as'][f'as{vrf_type}']['numero_as']}",
+                            f"  neighbor {neighbor_ip} activate",
+                            f"  neighbor {neighbor_ip} as-override",
+                            f" exit-address-family"
+                        ]
+        
+        # bgp pour CE 
+        if nom_r in ["CE1", "CE2", "CE3", "CE4"]:
+            # Router ID
+            config_lines.append(f" router-id {r_data['router_id']}")
+            
+            # eBGP neighbor (vers PE)
+            for neighbor_name, neighbor_data in r_data["voisin"].items():
+                neighbor_ip = neighbor_data['adresse_ip'].split("/")[0]
+                config_lines.append(f" neighbor {neighbor_ip} remote-as 111")
+            
+            # Network statement pour loopback
+            loopback_ip = r_data['adresse_loopback'].split('/')[0]
+            config_lines.append(f" network {loopback_ip} mask 255.255.255.255")
+        
+        config_lines.append("!")
 
 
-
-
-
-
-    config += [
-    "!",
-
-    "ip community-list standard L_CUSTOMER permit 0:1",
-    "ip community-list standard L_PEER permit 0:2",
-    "ip community-list standard L_PROVIDER permit 0:3",
-    "!",
-
-    f"ipv6 prefix-list MY_AS permit {prefixe_propre}::/48",
-    "!",
-
-    "route-map TAG_IN_CUSTOMER permit 10",
-    " set community 0:1 additive",
-    " set local-preference 200",
-    "!",
-    "route-map TAG_IN_PEER permit 10",
-    " set community 0:2 additive",
-    " set local-preference 150",
-    "!",
-    "route-map TAG_IN_PROVIDER permit 10",
-    " set community 0:3 additive",
-    " set local-preference 100",
-    "!",
-
-    "route-map EXPORT_TO_NON_CUSTOMER permit 10",
-    " match ipv6 address prefix-list MY_AS",
-    "!",
-    "route-map EXPORT_TO_NON_CUSTOMER permit 20",
-    " match community L_CUSTOMER",
-    "!",
-
-    "route-map EXPORT_TO_NON_CUSTOMER deny 30",
-    " match community L_PEER",
-    "!",
-    "route-map EXPORT_TO_NON_CUSTOMER deny 40",
-    " match community L_PROVIDER",
-    "!",
-
-    "route-map EXPORT_TO_CUSTOMER permit 50",
-    "!"
-]
-    return "/n".join(config)
+    
+    config_lines += [
+        "end",
+        "wr"
+    ]
+    
+    return "\n".join(config_lines)
 
 
 
 if __name__ == "__main__":
-    for r_nom, r_uuid in mapping_routeur_uuid.items():
+    # Générer un fichier txt pour comparaison
+    output_txt = []
+    
+    for r_nom in mapping_routeur_uuid.keys():
         config_txt = generer_config(r_nom)
         if config_txt:
-            path = os.path.join(CHEMIN_PROJET, r_uuid, "configs")
-            os.makedirs(path, exist_ok=True)
-            num = "".join(filter(str.isdigit, r_nom))
-            with open(os.path.join(path, f"i{num}_startup-config.cfg"), "w") as f:
-                f.write(config_txt)
-    print("Configurations générée avec succès.")
+            output_txt.append(f"\n{'='*80}\n")
+            output_txt.append(f"ROUTEUR: {r_nom}\n")
+            output_txt.append(f"{'='*80}\n\n")
+            output_txt.append(config_txt)
+            output_txt.append(f"\n\n")
+    
+    # Écrire dans un fichier txt pour comparaison
+    with open("config_output_generated.txt", "w") as f:
+        f.writelines(output_txt)
+
+# if __name__ == "__main__":
+#     for r_nom, r_uuid in mapping_routeur_uuid.items():
+#         config_txt = generer_config(r_nom)
+#         if config_txt:
+#             path = os.path.join(CHEMIN_PROJET, r_uuid, "configs")
+#             os.makedirs(path, exist_ok=True)
+#             num = "".join(filter(str.isdigit, r_nom))
+#             with open(os.path.join(path, f"i{num}_startup-config.cfg"), "w") as f:
+#                 f.write(config_txt)
+#             print(f"Config générée pour {r_nom}")
