@@ -252,31 +252,13 @@ def generer_config(nom_r):
     return "\n".join(config_lines)
 
 
-
 if __name__ == "__main__":
-    # Générer un fichier txt pour comparaison
-    output_txt = []
-    
-    for r_nom in mapping_routeur_uuid.keys():
+    for r_nom, r_uuid in mapping_routeur_uuid.items():
         config_txt = generer_config(r_nom)
         if config_txt:
-            output_txt.append(f"\n{'='*80}\n")
-            output_txt.append(f"ROUTEUR: {r_nom}\n")
-            output_txt.append(f"{'='*80}\n\n")
-            output_txt.append(config_txt)
-            output_txt.append(f"\n\n")
-    
-    # Écrire dans un fichier txt pour comparaison
-    with open("config_output_generated.txt", "w") as f:
-        f.writelines(output_txt)
-
-# if __name__ == "__main__":
-#     for r_nom, r_uuid in mapping_routeur_uuid.items():
-#         config_txt = generer_config(r_nom)
-#         if config_txt:
-#             path = os.path.join(CHEMIN_PROJET, r_uuid, "configs")
-#             os.makedirs(path, exist_ok=True)
-#             num = "".join(filter(str.isdigit, r_nom))
-#             with open(os.path.join(path, f"i{num}_startup-config.cfg"), "w") as f:
-#                 f.write(config_txt)
-#             print(f"Config générée pour {r_nom}")
+            path = os.path.join(CHEMIN_PROJET, r_uuid, "configs")
+            os.makedirs(path, exist_ok=True)
+            num = "".join(filter(str.isdigit, r_nom))
+            with open(os.path.join(path, f"i{num}_startup-config.cfg"), "w") as f:
+                f.write(config_txt)
+            print(f"Config générée pour {r_nom}")
