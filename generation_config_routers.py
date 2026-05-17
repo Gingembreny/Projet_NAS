@@ -52,7 +52,7 @@ def generer_config(nom_r):
     if not r_data: return None
 
     as_num = as_du_routeur["numero_as"]
-    if nom_r != "RR":
+    if nom_r != "RR" and as_num == "111":
         config = [f"hostname {nom_r}", "ip cef", "mpls label protocol ldp"]
     else : 
         config = [f"hostname {nom_r}", "ip cef"]
