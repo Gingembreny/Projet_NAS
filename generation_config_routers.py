@@ -26,8 +26,8 @@ mapping_routeur_uuid = {
 mapping_fichiers = {
     "PE1": "i1_startup-config.cfg",
     "P1":  "i2_startup-config.cfg",
-    "P2":  "i3_startup-config.cfg", # À vérifier selon tes dossiers
-    "RR":  "i5_startup-config.cfg", # Correspond à ton dossier 2e34189e... dans l'image
+    "P2":  "i3_startup-config.cfg", 
+    "RR":  "i5_startup-config.cfg", 
     "PE2": "i4_startup-config.cfg",
     "CE1": "i6_startup-config.cfg",
     "CE2": "i7_startup-config.cfg",
@@ -88,7 +88,7 @@ def generer_config(nom_r):
         if nom_r == "RR":
                 config += [" ip ospf cost 1000"]
         # MPLS uniquement dans le backbone (AS 111)
-        if as_num == "111" and v_nom in as_du_routeur["routers"] and nom_r != "RR" and v_nom != "RR":
+        if as_num == "111" and nom_r != "RR":
             config.append(" mpls ip")
         config += [" no shutdown", "!"]
 
