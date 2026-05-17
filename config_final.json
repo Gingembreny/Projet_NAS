@@ -1,0 +1,215 @@
+{
+    "as": {
+        "as111": {
+            "numero_as": "111",
+            "routers": {
+                "P1": {
+                    "adresse_loopback": "10.10.10.2",
+                    "masque": "255.255.255.255",
+                    "nom": "P1",
+                    "router_id": "111.0.0.2",
+                    "voisin": {
+                        "P2": {
+                            "adresse_ip": "10.10.1.5",
+                            "interface": "GigabitEthernet1/0",
+                            "masque": "255.255.255.252",
+                            "nom": "P2"
+                        },
+                        "PE1": {
+                            "adresse_ip": "10.10.1.2",
+                            "interface": "FastEthernet0/0",
+                            "masque": "255.255.255.252",
+                            "nom": "PE1"
+                        }
+                    }
+                },
+                "P2": {
+                    "adresse_loopback": "10.10.10.4",
+                    "masque": "255.255.255.255",
+                    "nom": "P2",
+                    "router_id": "111.0.0.4",
+                    "voisin": {
+                        "P1": {
+                            "adresse_ip": "10.10.1.6",
+                            "interface": "FastEthernet0/0",
+                            "masque": "255.255.255.252",
+                            "nom": "P1"
+                        },
+                        "PE2": {
+                            "adresse_ip": "10.10.1.17",
+                            "interface": "GigabitEthernet1/0",
+                            "masque": "255.255.255.252",
+                            "nom": "PE2"
+                        }
+                    }
+                },
+                "PE1": {
+                    "adresse_loopback": "10.10.10.1",
+                    "masque": "255.255.255.255",
+                    "nom": "PE1",
+                    "router_id": "111.0.0.1",
+                    "voisin": {
+                        "CE1": {
+                            "adresse_ip": "10.255.255.1",
+                            "as_distant": "222",
+                            "interface": "GigabitEthernet2/0",
+                            "masque": "255.255.255.252",
+                            "nom": "CE1",
+                            "rd": "111:1"
+                        },
+                        "CE2": {
+                            "adresse_ip": "10.255.255.9",
+                            "as_distant": "333",
+                            "interface": "GigabitEthernet3/0",
+                            "masque": "255.255.255.252",
+                            "nom": "CE2",
+                            "rd": "111:2"
+                        },
+                        "P1": {
+                            "adresse_ip": "10.10.1.1",
+                            "interface": "FastEthernet0/0",
+                            "masque": "255.255.255.252",
+                            "nom": "P1"
+                        },
+                        "RR": {
+                            "adresse_ip": "10.10.1.10",
+                            "interface": "GigabitEthernet1/0",
+                            "masque": "255.255.255.252",
+                            "nom": "RR"
+                        }
+                    }
+                },
+                "PE2": {
+                    "adresse_loopback": "10.10.10.5",
+                    "masque": "255.255.255.255",
+                    "nom": "PE2",
+                    "router_id": "111.0.0.5",
+                    "voisin": {
+                        "CE3": {
+                            "adresse_ip": "10.255.255.5",
+                            "as_distant": "222",
+                            "interface": "GigabitEthernet2/0",
+                            "masque": "255.255.255.252",
+                            "nom": "CE3",
+                            "rd": "111:1"
+                        },
+                        "CE4": {
+                            "adresse_ip": "10.255.255.13",
+                            "as_distant": "333",
+                            "interface": "GigabitEthernet3/0",
+                            "masque": "255.255.255.252",
+                            "nom": "CE4",
+                            "rd": "111:2"
+                        },
+                        "P2": {
+                            "adresse_ip": "10.10.1.18",
+                            "interface": "GigabitEthernet1/0",
+                            "masque": "255.255.255.252",
+                            "nom": "P2"
+                        },
+                        "RR": {
+                            "adresse_ip": "10.10.1.14",
+                            "interface": "FastEthernet0/0",
+                            "masque": "255.255.255.252",
+                            "nom": "RR"
+                        }
+                    }
+                },
+                "RR": {
+                    "adresse_loopback": "10.10.10.3",
+                    "masque": "255.255.255.255",
+                    "nom": "RR",
+                    "router_id": "111.0.0.3",
+                    "voisin": {
+                        "PE1": {
+                            "adresse_ip": "10.10.1.9",
+                            "interface": "FastEthernet0/0",
+                            "masque": "255.255.255.252",
+                            "nom": "PE1"
+                        },
+                        "PE2": {
+                            "adresse_ip": "10.10.1.13",
+                            "interface": "GigabitEthernet1/0",
+                            "masque": "255.255.255.252",
+                            "nom": "PE2"
+                        }
+                    }
+                }
+            }
+        },
+        "as222": {
+            "adresse_CE1": "10.20.1.1/24",
+            "adresse_CE3": "10.20.2.1/24",
+            "numero_as": "222",
+            "routers": {
+                "CE1": {
+                    "adresse_loopback": "10.20.1.1",
+                    "masque": "255.255.255.0",
+                    "nom": "CE1",
+                    "router_id": "222.0.0.1",
+                    "voisin": {
+                        "PE1": {
+                            "adresse_ip": "10.255.255.2",
+                            "as_distant": "111",
+                            "interface": "FastEthernet0/0",
+                            "masque": "255.255.255.252",
+                            "nom": "PE1"
+                        }
+                    }
+                },
+                "CE3": {
+                    "adresse_loopback": "10.20.2.1",
+                    "masque": "255.255.255.0",
+                    "nom": "CE3",
+                    "router_id": "222.0.0.2",
+                    "voisin": {
+                        "PE2": {
+                            "adresse_ip": "10.255.255.6",
+                            "as_distant": "111",
+                            "interface": "FastEthernet0/0",
+                            "masque": "255.255.255.252",
+                            "nom": "PE2"
+                        }
+                    }
+                }
+            }
+        },
+        "as333": {
+            "adresse_CE2": "10.30.1.1/24",
+            "adresse_CE4": "10.30.2.1/24",
+            "numero_as": "333",
+            "routers": {
+                "CE2": {
+                    "adresse_loopback": "10.30.1.1",
+                    "masque": "255.255.255.0",
+                    "nom": "CE2",
+                    "router_id": "333.0.0.1",
+                    "voisin": {
+                        "PE1": {
+                            "adresse_ip": "10.255.255.10",
+                            "as_distant": "111",
+                            "interface": "FastEthernet0/0",
+                            "masque": "255.255.255.252",
+                            "nom": "PE1"
+                        }
+                    }
+                },
+                "CE4": {
+                    "adresse_loopback": "10.30.2.1",
+                    "masque": "255.255.255.0",
+                    "nom": "CE4",
+                    "router_id": "333.0.0.2",
+                    "voisin": {
+                        "PE2": {
+                            "adresse_ip": "10.255.255.14",
+                            "as_distant": "111",
+                            "interface": "FastEthernet0/0",
+                            "masque": "255.255.255.252",
+                            "nom": "PE2"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
