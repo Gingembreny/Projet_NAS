@@ -1,0 +1,42 @@
+May 16 15:30:03.924 HYPERVISOR: Release 0.2.23-amd64/Darwin (tag 2023010200)
+May 16 15:30:03.925 HYPERVISOR: Started on IP = 127.0.0.1, TCP port = 50175.
+May 16 15:30:03.936 HYPERVISOR: exec_cmd: hypervisor version 
+May 16 15:30:03.936 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips 
+May 16 15:30:03.936 GENERAL: working_dir=/Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips
+May 16 15:30:03.936 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips/0696c35b-d6f9-493f-9563-6c7f854bd95a 
+May 16 15:30:03.936 GENERAL: working_dir=/Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips/0696c35b-d6f9-493f-9563-6c7f854bd95a
+May 16 15:30:03.936 HYPERVISOR: exec_cmd: vm create CE2 7 c7200 
+May 16 15:30:03.937 VM: VM CE2 created.
+May 16 15:30:03.937 HYPERVISOR: exec_cmd: vm set_con_tcp_port CE2 5006 
+May 16 15:30:03.937 HYPERVISOR: exec_cmd: c7200 get_mac_addr CE2 
+May 16 15:30:03.938 HYPERVISOR: exec_cmd: vm get_status CE2 
+May 16 15:30:03.938 HYPERVISOR: exec_cmd: vm slot_add_binding CE2 0 0 C7200-IO-FE 
+May 16 15:30:03.938 HYPERVISOR: exec_cmd: vm set_disk0 CE2 0 
+May 16 15:30:03.938 HYPERVISOR: exec_cmd: vm set_ios CE2 /Users/gaillardou/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+May 16 15:30:03.938 HYPERVISOR: exec_cmd: c7200 set_mac_addr CE2 ca07.f058.0000 
+May 16 15:30:03.939 HYPERVISOR: exec_cmd: vm set_nvram CE2 512 
+May 16 15:30:03.939 HYPERVISOR: exec_cmd: vm set_ram CE2 512 
+May 16 15:30:03.939 HYPERVISOR: exec_cmd: vm get_status CE2 
+May 16 15:30:03.939 HYPERVISOR: exec_cmd: vm slot_add_binding CE2 1 0 PA-GE 
+May 16 15:30:03.940 HYPERVISOR: exec_cmd: vm get_status CE2 
+May 16 15:30:03.940 HYPERVISOR: exec_cmd: vm slot_add_binding CE2 2 0 PA-GE 
+May 16 15:30:03.940 HYPERVISOR: exec_cmd: vm get_status CE2 
+May 16 15:30:03.940 HYPERVISOR: exec_cmd: vm slot_add_binding CE2 3 0 PA-GE 
+May 16 15:30:05.118 HYPERVISOR: exec_cmd: nio create_udp udp-c822c3f9-b916-44ef-823d-0164a51ef90a 10022 127.0.0.1 10023 
+May 16 15:30:05.342 HYPERVISOR: exec_cmd: vm slot_add_nio_binding CE2 0 0 udp-c822c3f9-b916-44ef-823d-0164a51ef90a 
+May 16 15:30:05.342 HYPERVISOR: exec_cmd: vm get_status CE2 
+May 16 15:34:32.299 HYPERVISOR: exec_cmd: vm set_ghost_status CE2 2 
+May 16 15:34:32.300 HYPERVISOR: exec_cmd: vm set_ghost_file CE2 /Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips/c7200-advipservicesk9-mz.152-4.S5.image-512.ghost 
+May 16 15:34:32.300 HYPERVISOR: exec_cmd: vm get_status CE2 
+May 16 15:34:32.300 HYPERVISOR: exec_cmd: vm set_config CE2 configs/i7_startup-config.cfg 
+May 16 15:34:32.301 HYPERVISOR: exec_cmd: vm start CE2 
+May 16 15:35:02.574 HYPERVISOR: exec_cmd: vm extract_config CE2 
+May 16 15:38:14.555 HYPERVISOR: exec_cmd: vm get_status CE2 
+May 16 15:38:14.556 HYPERVISOR: exec_cmd: vm stop CE2 
+May 16 15:38:14.638 VM: VM CE2 shutdown.
+May 16 15:38:14.639 HYPERVISOR: exec_cmd: vm extract_config CE2 
+May 16 15:38:14.639 HYPERVISOR: exec_cmd: vm delete CE2 
+May 16 15:38:14.639 VM: VM CE2 destroyed.
+May 16 15:38:14.639 HYPERVISOR: exec_cmd: hypervisor stop 
+May 16 15:38:14.752 HYPERVISOR: Stopped.
+May 16 15:38:14.752 GENERAL: reset done.

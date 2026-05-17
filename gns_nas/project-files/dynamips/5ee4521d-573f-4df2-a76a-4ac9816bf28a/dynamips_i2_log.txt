@@ -1,0 +1,60 @@
+May 16 15:30:03.681 HYPERVISOR: Release 0.2.23-amd64/Darwin (tag 2023010200)
+May 16 15:30:03.682 HYPERVISOR: Started on IP = 127.0.0.1, TCP port = 50155.
+May 16 15:30:03.692 HYPERVISOR: exec_cmd: hypervisor version 
+May 16 15:30:03.693 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips 
+May 16 15:30:03.693 GENERAL: working_dir=/Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips
+May 16 15:30:03.693 HYPERVISOR: exec_cmd: hypervisor working_dir /Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips/5ee4521d-573f-4df2-a76a-4ac9816bf28a 
+May 16 15:30:03.693 GENERAL: working_dir=/Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips/5ee4521d-573f-4df2-a76a-4ac9816bf28a
+May 16 15:30:03.693 HYPERVISOR: exec_cmd: vm create P1 2 c7200 
+May 16 15:30:03.693 VM: VM P1 created.
+May 16 15:30:03.694 HYPERVISOR: exec_cmd: vm set_con_tcp_port P1 5001 
+May 16 15:30:03.694 HYPERVISOR: exec_cmd: c7200 get_mac_addr P1 
+May 16 15:30:03.694 HYPERVISOR: exec_cmd: vm get_status P1 
+May 16 15:30:03.694 HYPERVISOR: exec_cmd: vm slot_add_binding P1 0 0 C7200-IO-FE 
+May 16 15:30:03.694 HYPERVISOR: exec_cmd: vm set_disk0 P1 0 
+May 16 15:30:03.695 HYPERVISOR: exec_cmd: vm set_ios P1 /Users/gaillardou/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+May 16 15:30:03.695 HYPERVISOR: exec_cmd: c7200 set_mac_addr P1 ca02.f04b.0000 
+May 16 15:30:03.696 HYPERVISOR: exec_cmd: vm set_nvram P1 512 
+May 16 15:30:03.696 HYPERVISOR: exec_cmd: vm set_ram P1 512 
+May 16 15:30:03.696 HYPERVISOR: exec_cmd: vm get_status P1 
+May 16 15:30:03.696 HYPERVISOR: exec_cmd: vm slot_add_binding P1 1 0 PA-GE 
+May 16 15:30:03.696 HYPERVISOR: exec_cmd: vm get_status P1 
+May 16 15:30:03.697 HYPERVISOR: exec_cmd: vm slot_add_binding P1 2 0 PA-GE 
+May 16 15:30:03.697 HYPERVISOR: exec_cmd: vm get_status P1 
+May 16 15:30:03.697 HYPERVISOR: exec_cmd: vm slot_add_binding P1 3 0 PA-GE 
+May 16 15:30:04.307 HYPERVISOR: exec_cmd: nio create_udp udp-058f4d59-19e9-4198-93d4-b1f21c2d6af8 10004 127.0.0.1 10005 
+May 16 15:30:04.535 HYPERVISOR: exec_cmd: vm slot_add_nio_binding P1 0 0 udp-058f4d59-19e9-4198-93d4-b1f21c2d6af8 
+May 16 15:30:04.536 HYPERVISOR: exec_cmd: vm get_status P1 
+May 16 15:30:05.371 HYPERVISOR: exec_cmd: nio create_udp udp-e8beff2e-1a4f-4ac0-ad17-47e63dbb8eaa 10026 127.0.0.1 10027 
+May 16 15:30:05.373 HYPERVISOR: exec_cmd: vm slot_add_nio_binding P1 1 0 udp-e8beff2e-1a4f-4ac0-ad17-47e63dbb8eaa 
+May 16 15:30:05.374 HYPERVISOR: exec_cmd: vm get_status P1 
+May 16 15:34:31.363 HYPERVISOR: exec_cmd: vm create Ghost 0 c7200 
+May 16 15:34:31.364 VM: VM Ghost created.
+May 16 15:34:31.365 HYPERVISOR: exec_cmd: vm set_ios Ghost /Users/gaillardou/GNS3/images/IOS/c7200-advipservicesk9-mz.152-4.S5.image 
+May 16 15:34:31.365 HYPERVISOR: exec_cmd: vm set_ghost_status Ghost 1 
+May 16 15:34:31.365 HYPERVISOR: exec_cmd: vm set_ghost_file Ghost /Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips/c7200-advipservicesk9-mz.152-4.S5.image-512.ghost 
+May 16 15:34:31.366 HYPERVISOR: exec_cmd: vm set_ram Ghost 512 
+May 16 15:34:31.366 HYPERVISOR: exec_cmd: vm get_status Ghost 
+May 16 15:34:31.366 HYPERVISOR: exec_cmd: vm set_config Ghost configs/i0_startup-config.cfg 
+May 16 15:34:31.367 HYPERVISOR: exec_cmd: vm start Ghost 
+May 16 15:34:31.683 HYPERVISOR: exec_cmd: vm get_status Ghost 
+May 16 15:34:31.684 HYPERVISOR: exec_cmd: vm stop Ghost 
+May 16 15:34:31.814 VM: VM Ghost shutdown.
+May 16 15:34:31.815 HYPERVISOR: exec_cmd: vm extract_config Ghost 
+May 16 15:34:31.815 HYPERVISOR: exec_cmd: vm clean_delete Ghost 
+May 16 15:34:31.815 VM: VM Ghost destroyed.
+May 16 15:34:31.820 HYPERVISOR: exec_cmd: vm set_ghost_status P1 2 
+May 16 15:34:31.820 HYPERVISOR: exec_cmd: vm set_ghost_file P1 /Users/gaillardou/Desktop/GitHub/Projet_NAS/gns_nas/project-files/dynamips/c7200-advipservicesk9-mz.152-4.S5.image-512.ghost 
+May 16 15:34:31.820 HYPERVISOR: exec_cmd: vm get_status P1 
+May 16 15:34:31.821 HYPERVISOR: exec_cmd: vm set_config P1 configs/i2_startup-config.cfg 
+May 16 15:34:31.821 HYPERVISOR: exec_cmd: vm start P1 
+May 16 15:35:02.074 HYPERVISOR: exec_cmd: vm extract_config P1 
+May 16 15:38:14.207 HYPERVISOR: exec_cmd: vm get_status P1 
+May 16 15:38:14.208 HYPERVISOR: exec_cmd: vm stop P1 
+May 16 15:38:14.304 VM: VM P1 shutdown.
+May 16 15:38:14.305 HYPERVISOR: exec_cmd: vm extract_config P1 
+May 16 15:38:14.306 HYPERVISOR: exec_cmd: vm delete P1 
+May 16 15:38:14.306 VM: VM P1 destroyed.
+May 16 15:38:14.307 HYPERVISOR: exec_cmd: hypervisor stop 
+May 16 15:38:14.545 HYPERVISOR: Stopped.
+May 16 15:38:14.545 GENERAL: reset done.
