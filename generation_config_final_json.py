@@ -3,153 +3,154 @@
 
 import json
 
-FICHIER_JSON = "fichier_intension.json"
+FICHIER_INTENTION = "fichier_intension.json"
+FICHIER_FINAL = "config_final.json"
 
-# Simulation du chargement (remplacez par votre lecture de fichier)
-with open(FICHIER_JSON, "r") as f:
-    data = json.load(f)
+with open(FICHIER_INTENTION, "r") as f:
+    donnees = json.load(f)
 
-def cidr_to_mask(cidr):
-    """Convertit un CIDR (ex: 30) en masque décimal (ex: 255.255.255.252)"""
+def cidr_vers_masque(cidr):
+    """Convertit un CIDR (ex: /30) en masque décimal (ex: 255.255.255.252)"""
     cidr = int(cidr)
-    mask = (0xffffffff >> (32 - cidr)) << (32 - cidr)
-    return f"{(mask >> 24) & 0xff}.{(mask >> 16) & 0xff}.{(mask >> 8) & 0xff}.{mask & 0xff}"
+    masque_bin = (0xffffffff >> (32 - cidr)) << (32 - cidr)
+    return f"{(masque_bin >> 24) & 0xff}.{(masque_bin >> 16) & 0xff}.{(masque_bin >> 8) & 0xff}.{masque_bin & 0xff}"
 
-def process_ip_data(entry_dict, full_ip_with_mask, key_name="adresse_ip"):
+def traiter_donnees_ip(dictionnaire_entree, ip_avec_masque, nom_cle="adresse_ip"):
     """
-    Sépare l'IP et le CIDR et ajoute les clés spécifiées (par défaut 'adresse_ip') 
+    Sépare l'IP et le CIDR et ajoute les clés spécifiées
     et 'masque' dans le dictionnaire fourni.
     """
-    ip, cidr = full_ip_with_mask.split('/')
-    entry_dict[key_name] = ip
-    entry_dict["masque"] = cidr_to_mask(cidr)
+    ip, cidr = ip_avec_masque.split('/')
+    dictionnaire_entree[nom_cle] = ip
+    dictionnaire_entree["masque"] = cidr_vers_masque(cidr)
 
-# --- Configuration AS 111 (Cœur de réseau) ---
-num_as_core = "111"
-liste_interface = data["liste_interface"]
-data_as111 = data["as"]["as111"]
-adresse_reseau = data_as111["adresse_reseau"]
-loopback_base = data_as111["adresse_loopback"]
-
-def get_free_interface(as_target, nom_router):
-    router_obj = data["as"][as_target]["routers"].get(nom_router, {})
-    used_interfaces = [v["interface"] for v in router_obj.get("voisin", {}).values() if "interface" in v]
-    for intf in liste_interface:
-        if intf not in used_interfaces:
-            return intf
+def obtenir_interface_libre(id_as, nom_routeur):
+    routeur_obj = donnees["as"][id_as]["routers"].get(nom_routeur, {})
+    interfaces_utilisees = [v["interface"] for v in routeur_obj.get("voisin", {}).values() if "interface" in v]
+    for interface in liste_interfaces_disponibles:
+        if interface not in interfaces_utilisees:
+            return interface
     return None  
 
-def configure_as(data, as_id, is_core=False):
-    as_key = f"as{as_id}"
-    as_data = data["as"][as_key]
+def configurer_as(donnees, num_as, est_coeur=False):
+    cle_as = f"as{num_as}"
+    donnees_as = donnees["as"][cle_as]
     
-    # 1. Initialisation des routeurs
-    noms_routers = list(as_data.get("topologie", {}).keys()) or list(as_data.get("routers", {}).keys())
+    noms_routeurs = list(donnees_as.get("topologie", {}).keys()) or list(donnees_as.get("routers", {}).keys())
     
-    for i, nom in enumerate(noms_routers, start=1):
-        if nom not in as_data["routers"]:
-            as_data["routers"][nom] = {"voisin": {}}
-        
-        # On définit le router_id systématiquement
-        as_data["routers"][nom].update({
+    for i, nom in enumerate(noms_routeurs, start=1):
+        if nom not in donnees_as["routers"]:
+            donnees_as["routers"][nom] = {"voisin": {}}
+
+        donnees_as["routers"][nom].update({
             "nom": nom,
-            "router_id": f"{as_id}.0.0.{i}"
+            "router_id": f"{num_as}.0.0.{i}"
         })
 
-        # --- LOGIQUE D'ADRESSAGE LOOPBACK SÉCURISÉE ---
         cle_specifique = f"adresse_{nom}"
+
+    # CE        
+        if cle_specifique in donnees_as:
+            ip_complete = donnees_as[cle_specifique]
+            traiter_donnees_ip(donnees_as["routers"][nom], ip_complete, nom_cle="adresse_loopback")
         
-        if cle_specifique in as_data:
-            # Cas des CE : on utilise l'IP spécifique du fichier d'intention
-            ip_complete = as_data[cle_specifique]
-            process_ip_data(as_data["routers"][nom], ip_complete, key_name="adresse_loopback")
+    # P/PE/RR
         else:
-            # Cas des P/PE/RR ou si l'IP n'est pas spécifiée
-            # On définit loopback_base ICI pour éviter l'UnboundLocalError
-            loopback_base = as_data.get("adresse_loopback", f"{as_id}.10.10.")
-            process_ip_data(as_data["routers"][nom], f"{loopback_base}{i}/32", key_name="adresse_loopback")
+            base_loopback = donnees_as.get("adresse_loopback", f"{num_as}.10.10.")
+            traiter_donnees_ip(donnees_as["routers"][nom], f"{base_loopback}{i}/32", nom_cle="adresse_loopback")
 
-    # 2. Liens internes (IGP) (inchangé)
-    if "topologie" in as_data:
-        id_ip = 0
-        liens_faits = set()
-        for r_name, voisins in as_data["topologie"].items():
-            for v_name in voisins:
-                lien = tuple(sorted([r_name, v_name]))
-                if lien in liens_faits: continue
-                liens_faits.add(lien)
-                intf_r = get_free_interface(as_key, r_name)
-                intf_v = get_free_interface(as_key, v_name)
-                as_data["routers"][r_name]["voisin"][v_name] = {"interface": intf_r, "nom": v_name}
-                as_data["routers"][v_name]["voisin"][r_name if 'router_nom' in locals() else r_name] = {"interface": intf_v, "nom": r_name}
-                base_ip = adresse_reseau.rstrip('.')
-                process_ip_data(as_data["routers"][r_name]["voisin"][v_name], f"{base_ip}.{id_ip + 1}/30")
-                process_ip_data(as_data["routers"][v_name]["voisin"][r_name], f"{base_ip}.{id_ip + 2}/30")
-                id_ip += 4
-
-    # 3. Liens Externes (PE-CE) - AJOUT DU RD ICI
-    if is_core and "topologie_client" in as_data:
-        id_ip_pece = 0
-        for client_entry in as_data["topologie_client"]:
-            c_as_num = client_entry["numero_as"]
-            c_as_key = f"as{c_as_num}"
-            # On récupère le RD défini dans le fichier d'intention
-            route_distinguisher = client_entry.get("rd")
-            
-            for pe_nom, ce_list in client_entry.items():
-                # On ignore les clés qui ne sont pas des noms de PE
-                if pe_nom in ["numero_as", "rd"]: continue 
+    # IGP
+    if "topologie" in donnees_as:
+        id_ip_interne = 0
+        liens_termines = set()
+        adresse_reseau_igp = donnees_as["adresse_reseau"]
+        
+        for nom_r, liste_voisins in donnees_as["topologie"].items():
+            for nom_v in liste_voisins:
+                identifiant_lien = tuple(sorted([nom_r, nom_v]))
+                if identifiant_lien in liens_termines: continue
                 
-                for ce_nom in ce_list:
-                    if ce_nom not in data["as"][c_as_key]["routers"]:
-                        idx = len(data["as"][c_as_key]["routers"]) + 1
-                        data["as"][c_as_key]["routers"][ce_nom] = {
-                            "nom": ce_nom,
-                            "router_id": f"{c_as_num}.0.0.{idx}",
+                liens_termines.add(identifiant_lien)
+                intf_r = obtenir_interface_libre(cle_as, nom_r)
+                intf_v = obtenir_interface_libre(cle_as, nom_v)
+                
+                donnees_as["routers"][nom_r]["voisin"][nom_v] = {"interface": intf_r, "nom": nom_v}
+                donnees_as["routers"][nom_v]["voisin"][nom_r] = {"interface": intf_v, "nom": nom_r}
+                
+                base_ip = adresse_reseau_igp.rstrip('.')
+                traiter_donnees_ip(donnees_as["routers"][nom_r]["voisin"][nom_v], f"{base_ip}.{id_ip_interne + 1}/30")
+                traiter_donnees_ip(donnees_as["routers"][nom_v]["voisin"][nom_r], f"{base_ip}.{id_ip_interne + 2}/30")
+                id_ip_interne += 4
+
+    # PE - CE
+    if est_coeur and "topologie_client" in donnees_as:
+        id_ip_pece = 0
+        for entree_client in donnees_as["topologie_client"]:
+            as_client_num = entree_client["numero_as"]
+            cle_as_client = f"as{as_client_num}"
+            rd_client = entree_client.get("rd")
+            
+            for nom_pe, liste_ce in entree_client.items():
+                if nom_pe in ["numero_as", "rd"]: continue 
+                
+                for nom_ce in liste_ce:
+                    if nom_ce not in donnees["as"][cle_as_client]["routers"]:
+                        index_ce = len(donnees["as"][cle_as_client]["routers"]) + 1
+                        donnees["as"][cle_as_client]["routers"][nom_ce] = {
+                            "nom": nom_ce,
+                            "router_id": f"{as_client_num}.0.0.{index_ce}",
                             "voisin": {}
                         }
 
-                    intf_pe = get_free_interface(as_key, pe_nom)
-                    intf_ce = get_free_interface(c_as_key, ce_nom)
+                    intf_pe = obtenir_interface_libre(cle_as, nom_pe)
+                    intf_ce = obtenir_interface_libre(cle_as_client, nom_ce)
                     
                     ip_pe = f"10.255.255.{id_ip_pece + 1}"
                     ip_ce = f"10.255.255.{id_ip_pece + 2}"
 
-                    # Ajout de la clé 'rd' dans le dictionnaire du PE
-                    as_data["routers"][pe_nom]["voisin"][ce_nom] = {
+                    # côté PE (avec RD)
+                    donnees_as["routers"][nom_pe]["voisin"][nom_ce] = {
                         "interface": intf_pe, 
-                        "nom": ce_nom, 
-                        "as_distant": c_as_num,
-                        "rd": route_distinguisher  # <-- Insertion du RD
+                        "nom": nom_ce, 
+                        "as_distant": as_client_num,
+                        "rd": rd_client
                     }
                     
-                    data["as"][c_as_key]["routers"][ce_nom]["voisin"][pe_nom] = {
+                    # côté CE
+                    donnees["as"][cle_as_client]["routers"][nom_ce]["voisin"][nom_pe] = {
                         "interface": intf_ce, 
-                        "nom": pe_nom, 
-                        "as_distant": as_id
+                        "nom": nom_pe, 
+                        "as_distant": num_as
                     }
                     
-                    process_ip_data(as_data["routers"][pe_nom]["voisin"][ce_nom], f"{ip_pe}/30")
-                    process_ip_data(data["as"][c_as_key]["routers"][ce_nom]["voisin"][pe_nom], f"{ip_ce}/30")
+                    traiter_donnees_ip(donnees_as["routers"][nom_pe]["voisin"][nom_ce], f"{ip_pe}/30")
+                    traiter_donnees_ip(donnees["as"][cle_as_client]["routers"][nom_ce]["voisin"][nom_pe], f"{ip_ce}/30")
                     id_ip_pece += 4
 
-# 1. On configure l'AS de coeur (avec ses liens internes et PE-CE)
-configure_as(data, "111", is_core=True)
 
-# 2. On configure les AS clients (uniquement leurs structures internes)
-# On boucle sur tous les AS présents sauf le coeur
-for as_name in data["as"]:
-    num_as = data["as"][as_name]["numero_as"]
-    if num_as != "111":
-        configure_as(data, num_as, is_core=False)
+liste_interfaces_disponibles = donnees["liste_interface"]
 
-if "liste_interface" in data: del data["liste_interface"]
-for as_name in data["as"]:
-    keys_to_delete = ["topologie", "topologie_client", "adresse_reseau", "adresse_loopback"]
-    for key in keys_to_delete:
-        if key in data["as"][as_name]: del data["as"][as_name][key]
+# AS 111
+configurer_as(donnees, "111", est_coeur=True)
 
-with open("config_final.json", "w", encoding="utf-8") as f:
-    json.dump(data, f, indent=4, sort_keys=True)
+# AS 222 et AS 333
+for nom_as_cle in donnees["as"]:
+    numero_as_actuel = donnees["as"][nom_as_cle]["numero_as"]
+    if numero_as_actuel != "111":
+        configurer_as(donnees, numero_as_actuel, est_coeur=False)
 
-print("JSON généré avec succès avec séparation IP et Masque !")
+# supprime certaines clés du fichier d'intention
+if "liste_interface" in donnees: 
+    del donnees["liste_interface"]
+
+cles_a_nettoyer = ["topologie", "topologie_client", "adresse_reseau", "adresse_loopback"]
+for nom_as_cle in donnees["as"]:
+    for cle in cles_a_nettoyer:
+        if cle in donnees["as"][nom_as_cle]: 
+            del donnees["as"][nom_as_cle][cle]
+
+# Sauvegarde
+with open(FICHIER_FINAL, "w", encoding="utf-8") as f:
+    json.dump(donnees, f, indent=4, sort_keys=True)
+
+print(f"Fichier {FICHIER_FINAL} généré avec succès !")
